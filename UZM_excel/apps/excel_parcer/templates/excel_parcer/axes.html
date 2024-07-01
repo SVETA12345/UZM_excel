@@ -1,0 +1,651 @@
+{% extends 'excel_parcer/index.html' %}
+{% load static %}
+
+{%  block header %}
+<!--для fileupload-->
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <link type="text/css" href="{% static 'css/DragAndDropFile.css' %}" rel="stylesheet" />
+{% endblock %}
+
+
+{% block menu %}
+<div class="m-auto" style="text-align:center;">
+    <form action="" method="post">
+        {% csrf_token %}
+        <input name="run" value="47" id="run_id" hidden>
+        <div class="btn-group" role="group">
+            <button onclick="location.href += 'settings'" type="button" class="btn btn-outline-primary">Настройки импорта</button>
+            <button type="submit" id='show-data' class="btn btn-outline-primary" hidden>Показать данные</button>
+            <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#data_Modal1">
+                Добавить оси
+            </button>
+            <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#data_Modal2">
+                Добавить скорректированные значения
+            </button>
+            <button onclick="location.href += 'edit'" type="button" class="btn btn-outline-primary">
+                Редактировать</button>
+            <button onclick="location.href += 'graph'" type="button" class="btn btn-outline-primary">
+                Графики контроля</button>
+        </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block data %}
+<h3>{{context.selected_run}} | Активная фаза:
+    {% if context.selected_run.section.wellbore.well_name.status_drilling == 'ACTV'%}
+    <img src="{% static 'image/orange.png' %}" alt="Не в активной фазе" style="width: 25px; height: 25px;">
+    {% else %}
+    <img src="{% static 'image/grey.png' %}" alt="Не в активной фазе" style="width: 25px; height: 25px;">
+    {% endif %}</h3>
+<center>
+
+    <div class="container" style="max-width:None;">
+        <div class="row">
+            <div class="col-12">
+                <div class="upload-container" style="text-align:center;">
+                    <input type="file" id="file_upload" onchange="uploadFile(this)"/>
+                </div>
+                <br>
+            </div>
+<!--            <div class="col-2">-->
+<!--                <button onclick="uploadFiles()">Submit</button>-->
+<!--            </div>-->
+        </div>
+        <hr style="color:#FFC501;margin-top:0.5%;border-width: 3px">
+        <div class="row">
+            <div class="col-sm-4">
+                <table  class="table table-light table-sm table-bordered table-hover"
+                        name="table_axes">
+                    <thead class="thead-dark">
+                    <tr class="table" style="text-align: center;">
+                        <th scope="col">Глубина</th>
+                        <th scope="col">GX</th>
+                        <th scope="col">GY</th>
+                        <th scope="col">GZ</th>
+                        <th scope="col">BX</th>
+                        <th scope="col">BY</th>
+                        <th scope="col">BZ</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for obj in context.data %}
+                    <tr style="text-align: center;">
+                        <td scope="col">{{obj.depth_dot}}</td>
+                        <td scope="col">{{obj.CX_dot}}</td>
+                        <td scope="col">{{obj.CY_dot}}</td>
+                        <td scope="col"
+                            style="{% if obj.CZ < 0 %} background-color:#facfcf; {% endif %}">{{obj.CZ_dot}}</td>
+                        <td scope="col">{{obj.BX_dot}}</td>
+                        <td scope="col">{{obj.BY_dot}}</td>
+                        <td scope="col"
+                            style="{% if obj.BZ < 0 %} background-color:#facfcf; {% endif %}">{{obj.BZ_dot}}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="col-sm-8">
+                <table  class="table table-light table-sm table-bordered table-hover"
+                        name="table_calculation">
+                    <thead class="thead-dark">
+                    <tr class="table" style="text-align: center;">
+                        <th scope="col">Gtotal</th>
+                        <th scope="col">Btotal_raw</th>
+                        <th scope="col">Btotal_corr</th>
+                        <th scope="col">DIP_raw</th>
+                        <th scope="col">DIP_corr</th>
+                        <th scope="col">Зенитный угол</th>
+                        <th scope="col">Магнитный азимут</th>
+                        <th scope="col">{{context.selected_run.section.wellbore.well_name.get_north_direction}} азимут</th>
+                        <th scope="col" style="width: 30%">Комментарий</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for obj in context.data %}
+                    <tr style="text-align: center;">
+
+                        {% if obj.Gtotal < context.well.min_gtotal or obj.Gtotal > context.well.max_gtotal %}
+                        <td style="background-color:red" scope="col"> {{obj.Gtotal}} </td>
+                        {% else %}
+                        <td scope="col"> {{obj.Gtotal}} </td>
+                        {% endif %}
+
+                        {% if obj.Btotal < context.well.min_btotal or obj.Btotal > context.well.max_btotal %}
+                        <td style="background-color:red" scope="col"> {{obj.Btotal}} </td>
+                        {% else %}
+                        <td scope="col"> {{obj.Btotal}} </td>
+                        {% endif %}
+
+                        {% if obj.Btotal_corrFix < context.well.min_btotal or obj.Btotal_corrFix > context.well.max_btotal %}
+                        <td style="background-color:red" scope="col"> {{obj.Btotal_corrFix}}  </td>
+                        {% else %}
+                        <td scope="col"> {{obj.Btotal_corrFix}} </td>
+                        {% endif %}
+
+                        {% if obj.Dip < context.well.min_dip or obj.Dip > context.well.max_dip %}
+                        <td style="background-color:red" scope="col"> {{obj.Dip}} </td>
+                        {% else %}
+                        <td scope="col"> {{obj.Dip}} </td>
+                        {% endif %}
+
+                        {% if obj.DIP_corrFix < context.well.min_dip or obj.DIP_corrFix > context.well.max_dip %}
+                        <td style="background-color:red" scope="col"> {{obj.DIP_corrFix}} </td>
+                        {% else %}
+                        <td scope="col"> {{obj.DIP_corrFix}} </td>
+                        {% endif %}
+
+                        <td scope="col">{{obj.Zenit}}</td>
+                        <td scope="col">{{obj.Azimut}}</td>
+                        <td scope="col">{{obj.ItogAzimut}}</td>
+                        <td style="padding: 0em;">
+                            <textarea style='width: 100%; height: 26px; Border: none; outline: none;'
+                            onchange="put_comm({{obj.id}}, this.value);">{{obj.comment}}</textarea>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</center>
+
+
+
+
+<!-- модальное окно для добавления осей-->
+<div class="modal fade" id="data_Modal1" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Добавление осей</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action=""  method="post" name="data_form" id="AddAxesForm">
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="text" class="form-control" id="modal-run1" name="run" hidden>
+                </div>
+                <div class="form-group">
+                    <label>Выберите телесистему</label>
+                    <select type="text" name="device" class="form-select" id="device-select">
+                        {% for element in context.telesystem %}
+                        <option>{{element}}</option>
+                        {% endfor %}
+                        <option selected> ----- </option>
+                    </select>
+
+                    <div class="align-self-center">
+                        <label style="margin-top:2%">Коэффициенты пересчёта
+                            <a href="{% url 'add_device'%}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                    <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                                    <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
+                                </svg>
+                            </a>
+                        </label>
+
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">Gx</span>
+                            <input type="text" class="form-control" name="manually_gx" id="coef_gx" readonly>
+                            <span class="input-group-text">Gy</span>
+                            <input type="text" class="form-control" name="manually_gy" id="coef_gy" readonly>
+                            <span class="input-group-text">Gz</span>
+                            <input type="text" class="form-control" name="manually_gz" id="coef_gz" readonly>
+                            <span class="input-group-text">Bx</span>
+                            <input type="text" class="form-control" name="manually_bx" id="coef_bx" readonly>
+                            <span class="input-group-text">By</span>
+                            <input type="text" class="form-control" name="manually_by" id="coef_by" readonly>
+                            <span class="input-group-text">Bz</span>
+                            <input type="text" class="form-control" name="manually_bz" id="coef_bz" readonly>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group col-md">
+                    <a class="tooltip-test" title="Значения глубины и осей">
+                        <label for="depth-text">Данные:</label></a>
+                    <textarea class="form-control" id="depth-text" rows="20" name="data-axes"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="sendAxes();" class="btn btn-primary">Добавить</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- модальное окно для добавления скорректированных значений-->
+<div class="modal fade" id="data_Modal2" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Добавление скорректированных значений</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action=""  method="post" name="data_form" >
+            <div class="modal-body">
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="modal-run2" name="run" hidden>
+                    </div>
+
+                    <div class="form-group row">
+                        <div class="form-group col-md-4">
+                            <a class="tooltip-test" title="Вставьте значения глубины">
+                            <label for="depth-text">Глубина:</label></a>
+                            <textarea class="form-control"  rows="15" name="depth"></textarea>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <a class="tooltip-test" title="Вставьте значения Btotal_corr">
+                            <label>Btotal_corr:</label></a>
+                            <textarea class="form-control"  rows="15" name="Btotal_corr"></textarea>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <a class="tooltip-test" title="Вставьте значения DIP_corr">
+                            <label>DIP_corr:</label></a>
+                            <textarea class="form-control" rows="15" name="DIP_corr"></textarea>
+                        </div>
+                    </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Добавить</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- Модальное окно для замены замеров -->
+<button id="btn_meas_modal" data-toggle="modal" data-target="#meas_Modal" hidden>
+    Запустить замену замеров
+</button>
+<!-- Сама модалка-->
+<div class="modal fade" id="meas_Modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-xl" style="max-width:1800px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Перезапись данных | {{context.selected_run}}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="changes_form" method="post">
+                    <div class="row">
+                        <div class="col-6">
+                            <center>
+                                <h4>Старые значения</h4>
+                            </center>
+                            <table class="table table-sm">
+                                <thead class="thead-light">
+                                <tr>
+                                    <th scope="col">Глубина</th>
+                                    <th scope="col">BX</th>
+                                    <th scope="col">BY</th>
+                                    <th scope="col">BZ</th>
+                                    <th scope="col">GX</th>
+                                    <th scope="col">GY</th>
+                                    <th scope="col">GZ</th>
+                                    <th scope="col">Принять</th>
+                                </tr>
+                                </thead>
+                                <tbody id="old_tbd">
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-6">
+                            <center>
+                            <h4>Новые значения</h4>
+                            </center>
+                            <table class="table table-sm">
+                                <thead class="thead-light">
+                                <tr>
+                                    <th scope="col">Принять</th>
+                                    <th scope="col">Глубина</th>
+                                    <th scope="col">BX</th>
+                                    <th scope="col">BY</th>
+                                    <th scope="col">BZ</th>
+                                    <th scope="col">GX</th>
+                                    <th scope="col">GY</th>
+                                    <th scope="col">GZ</th>
+                                </tr>
+                                </thead>
+                                <tbody id="new_tbd">
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="location.reload();">Закрыть</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    <!-- Функция для сохранения комментариев к замерам -->
+    function put_comm(number, comment){
+        var params = new FormData();
+        params.set('id', number);
+        params.set('comment', comment);
+
+        fetch('http://'+window.location.hostname+':'+window.location.port+'/axes/api/comm',
+         { method: 'POST', body: params })
+             .then(response=>response.json()).
+             then(data=>{
+             console.log(data);
+             });
+    }
+
+    <!--  Функция для загрузки осей с формы  -->
+    function sendAxes(){
+        var params = new FormData(document.getElementById("AddAxesForm"));
+        fetch('http://'+window.location.hostname+':'+window.location.port+'/axes/api/addAxes',
+         {method: 'POST', body: params})
+                .then(response=>response.json())
+                .then(data=>{
+                console.log('Conflict = ', data.conflict);
+                if('warning' in data){
+                    Meas_array = new Array();
+                    <!--    Удаляем старые значения из формы         -->
+                    while (document.getElementById("old_tbd").firstChild) {
+                         document.getElementById("old_tbd").removeChild(document.getElementById("old_tbd").firstChild);
+                         document.getElementById("new_tbd").removeChild(document.getElementById("new_tbd").firstChild);
+                    }
+                    <!--           Заполняем старые значения         -->
+                    data.conflict.old.forEach(function(Value, index){
+                        var new_tr = document.createElement("tr");
+                        var tdDepth = document.createElement("td");
+                        tdDepth.innerHTML = Value.depth
+                        var tdBX = document.createElement("td");
+                        tdBX.innerHTML = Value.CX
+                        var tdBY = document.createElement("td");
+                        tdBY.innerHTML = Value.CY
+                        var tdBZ = document.createElement("td");
+                        tdBZ.innerHTML = Value.CZ
+                        var tdGX = document.createElement("td");
+                        tdGX.innerHTML = Value.BX
+                        var tdGY = document.createElement("td");
+                        tdGY.innerHTML = Value.BY
+                        var tdGZ = document.createElement("td");
+                        tdGZ.innerHTML = Value.BZ
+                        var tdBtn = document.createElement("td");
+                        html_btn = '<input type="radio" class="btn-check" name="options'+ index +'" id="first_opt'+ index +'" autocomplete="off" onclick="addMeas(this);"><label class="btn btn-outline-success" for="first_opt'+ index +'" style="height:25px; width:60px; display: flex; align-items: center; justify-content: center;">    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/></svg></label>'
+                        tdBtn.innerHTML = html_btn
+
+                        new_tr.appendChild(tdDepth)
+                        new_tr.appendChild(tdBX)
+                        new_tr.appendChild(tdBY)
+                        new_tr.appendChild(tdBZ)
+                        new_tr.appendChild(tdGX)
+                        new_tr.appendChild(tdGY)
+                        new_tr.appendChild(tdGZ)
+                        new_tr.appendChild(tdBtn)
+
+
+                        var old_body = document.getElementById("old_tbd");
+                        old_body.appendChild(new_tr);
+                         })
+                    <!--           Заполняем новые значения         -->
+                    data.conflict.new.forEach(function(Value, index){
+                        var new_tr = document.createElement("tr");
+
+                        var tdDepth = document.createElement("td");
+                        tdDepth.innerHTML = Value.depth
+                        var tdBX = document.createElement("td");
+                        tdBX.innerHTML = Value.CX
+                        var tdBY = document.createElement("td");
+                        tdBY.innerHTML = Value.CY
+                        var tdBZ = document.createElement("td");
+                        tdBZ.innerHTML = Value.CZ
+                        var tdGX = document.createElement("td");
+                        tdGX.innerHTML = Value.BX
+                        var tdGY = document.createElement("td");
+                        tdGY.innerHTML = Value.BY
+                        var tdGZ = document.createElement("td");
+                        tdGZ.innerHTML = Value.BZ
+                        var tdBtn = document.createElement("td");
+                        html_btn = '<input type="radio" class="btn-check" name="options'+ index +'" id="second_opt'+ index +'" autocomplete="off" onclick="addMeas(this);"><label class="btn btn-outline-success" for="second_opt'+ index +'" style="height:25px; width:60px; display: flex; align-items: center; justify-content: center;">    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/></svg></label>'
+                        tdBtn.innerHTML = html_btn
+
+                        new_tr.appendChild(tdBtn)
+                        new_tr.appendChild(tdDepth)
+                        new_tr.appendChild(tdBX)
+                        new_tr.appendChild(tdBY)
+                        new_tr.appendChild(tdBZ)
+                        new_tr.appendChild(tdGX)
+                        new_tr.appendChild(tdGY)
+                        new_tr.appendChild(tdGZ)
+
+                        var new_body = document.getElementById("new_tbd");
+                        new_body.appendChild(new_tr);
+                         })
+                    document.getElementById('btn_meas_modal').click();
+                }else{
+                    location.reload();}
+                });
+    }
+
+    <!--  Отправка замеров на перезапись  -->
+    function addMeas(obj){
+        let mList = new Array();
+        for (var i = 0; i < obj.parentNode.parentNode.childNodes.length; i++) {
+            let element = obj.parentNode.parentNode.childNodes[i].firstChild.textContent;
+            if(element != ''){
+                mList.push(element);}
+
+        }
+        console.log('mList=', mList)
+        var params = new FormData();
+        params.set('run_id', sessionStorage.getItem("run_id"))
+        params.set('depth', mList[0])
+        params.set('CX', mList[1])
+        params.set('CY', mList[2])
+        params.set('CZ', mList[3])
+        params.set('BX', mList[4])
+        params.set('BY', mList[5])
+        params.set('BZ', mList[6])
+        fetch('http://'+window.location.hostname+':'+window.location.port+'/axes/api/updateAxes',
+        {method: 'POST', body: params})
+        .then(response=>response.json())
+        .then(data=>{
+        console.log('Response = ', data);})
+    }
+
+    <!--  Функция для загрузки файла перетаскиванием  -->
+    function uploadFile(input_obj){
+    var data = new FormData()
+    data.append('run_id', sessionStorage.getItem("run_id"))
+    data.append('file',input_obj.files[0])
+
+    fetch('http://'+window.location.hostname+':'+window.location.port+'/axes/api/upload_file', {method: 'POST', body: data})
+    .then(response=>response.json())
+    .then(data=>{
+    console.log('Data = ', data)
+    if('warning' in data){
+        alert(data.warning);
+    }else if('conflict_warning' in data){
+        <!--    Разрешение конфликта перезаписи замеров    -->
+        Meas_array = new Array();
+        <!--    Удаляем старые значения из формы         -->
+        while (document.getElementById("old_tbd").firstChild) {
+             document.getElementById("old_tbd").removeChild(document.getElementById("old_tbd").firstChild);
+             document.getElementById("new_tbd").removeChild(document.getElementById("new_tbd").firstChild);
+        }
+        <!--           Заполняем старые значения         -->
+        data.conflict.old.forEach(function(Value, index){
+            var new_tr = document.createElement("tr");
+            var tdDepth = document.createElement("td");
+            tdDepth.innerHTML = Value.depth
+            var tdBX = document.createElement("td");
+            tdBX.innerHTML = Value.CX
+            var tdBY = document.createElement("td");
+            tdBY.innerHTML = Value.CY
+            var tdBZ = document.createElement("td");
+            tdBZ.innerHTML = Value.CZ
+            var tdGX = document.createElement("td");
+            tdGX.innerHTML = Value.BX
+            var tdGY = document.createElement("td");
+            tdGY.innerHTML = Value.BY
+            var tdGZ = document.createElement("td");
+            tdGZ.innerHTML = Value.BZ
+            var tdBtn = document.createElement("td");
+            html_btn = '<input type="radio" class="btn-check" name="options'+ index +'" id="first_opt'+ index +'" autocomplete="off" onclick="addMeas(this);"><label class="btn btn-outline-success" for="first_opt'+ index +'" style="height:25px; width:60px; display: flex; align-items: center; justify-content: center;">    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/></svg></label>'
+            tdBtn.innerHTML = html_btn
+
+            new_tr.appendChild(tdDepth)
+            new_tr.appendChild(tdBX)
+            new_tr.appendChild(tdBY)
+            new_tr.appendChild(tdBZ)
+            new_tr.appendChild(tdGX)
+            new_tr.appendChild(tdGY)
+            new_tr.appendChild(tdGZ)
+            new_tr.appendChild(tdBtn)
+
+
+            var old_body = document.getElementById("old_tbd");
+            old_body.appendChild(new_tr);
+             })
+        <!--           Заполняем новые значения         -->
+        data.conflict.new.forEach(function(Value, index){
+            var new_tr = document.createElement("tr");
+
+            var tdDepth = document.createElement("td");
+            tdDepth.innerHTML = Value.depth
+            var tdBX = document.createElement("td");
+            tdBX.innerHTML = Value.CX
+            var tdBY = document.createElement("td");
+            tdBY.innerHTML = Value.CY
+            var tdBZ = document.createElement("td");
+            tdBZ.innerHTML = Value.CZ
+            var tdGX = document.createElement("td");
+            tdGX.innerHTML = Value.BX
+            var tdGY = document.createElement("td");
+            tdGY.innerHTML = Value.BY
+            var tdGZ = document.createElement("td");
+            tdGZ.innerHTML = Value.BZ
+            var tdBtn = document.createElement("td");
+            html_btn = '<input type="radio" class="btn-check" name="options'+ index +'" id="second_opt'+ index +'" autocomplete="off" onclick="addMeas(this);"><label class="btn btn-outline-success" for="second_opt'+ index +'" style="height:25px; width:60px; display: flex; align-items: center; justify-content: center;">    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/></svg></label>'
+            tdBtn.innerHTML = html_btn
+
+            new_tr.appendChild(tdBtn)
+            new_tr.appendChild(tdDepth)
+            new_tr.appendChild(tdBX)
+            new_tr.appendChild(tdBY)
+            new_tr.appendChild(tdBZ)
+            new_tr.appendChild(tdGX)
+            new_tr.appendChild(tdGY)
+            new_tr.appendChild(tdGZ)
+
+            var new_body = document.getElementById("new_tbd");
+            new_body.appendChild(new_tr);
+             })
+        document.getElementById('btn_meas_modal').click();
+    }else{
+        location.reload();}  })
+    input_obj.value= "";
+    }
+
+    <!--Функция для модального окна 1 (Добавление осей)-->
+    $('#data_Modal1').on('show.bs.modal', function (event) {
+      var button = $(event.relatedTarget) // Кнопка которая запускает модальное окно
+      var recipient = button.data('whatever') // Извлечь информацию из data-* атрибутов
+      var data = button.data('run')
+
+      document.getElementById("modal-run1").value = sessionStorage.getItem("run_id");
+
+      <!-- Индекс телесистемы  -->
+      var params = new FormData();
+      params.set('run_id', sessionStorage.getItem("run_id"));
+
+      fetch('http://'+window.location.hostname+':'+window.location.port+'/axes/run_index', {
+           method: 'POST',
+           body: params }).then(response=>response.json())
+           .then(data=>{
+           var device = data.device;
+           document.getElementById("device-select").value=data.device;
+           var params = new FormData();
+           params.set('device_title', device);
+           <!--    Заполнение коэффициентов пересчёта    -->
+           fetch('http://'+window.location.hostname+':'+window.location.port+'/axes/api/coef_device', {
+           method: 'POST',
+           body: params }).then(response=>response.json())
+           .then(data=>{
+                       document.getElementById("coef_gx").value = data.GX;
+                       document.getElementById("coef_gy").value = data.GY;
+                       document.getElementById("coef_gz").value = data.GZ;
+                       document.getElementById("coef_bx").value = data.BX;
+                       document.getElementById("coef_by").value = data.BY;
+                       document.getElementById("coef_bz").value = data.BZ;
+                       });
+
+           })
+
+
+
+
+    })
+
+    <!--Функция для модального окна 2 (Добавление скорректированных значений)-->
+    $('#data_Modal2').on('show.bs.modal', function (event) {
+      var button = $(event.relatedTarget) // Кнопка которая запускает модальное окно
+      var recipient = button.data('whatever') // Извлечь информацию из data-* атрибутов
+      var data = button.data('run');
+
+      document.getElementById("modal-run2").value = sessionStorage.getItem("run_id");
+    })
+
+
+    <!-- Загрузили страницу -->
+    window.addEventListener('DOMContentLoaded', () => {
+        <!-- При загрузке открываем выбранную ранее скважину -->
+        let run_id = sessionStorage.getItem("run_id");
+        if (run_id != null) {
+            document.getElementById('run_id').value = run_id;
+          {% if context.selected_run == 'None' %}
+           document.getElementById('show-data').click();
+          {% endif %}
+        }
+
+        {% if context.error_depth|length != 0 %}
+          alert('Не удалось найти глубины: '+'{{context.error_depth}}');
+        {% endif %}
+    });
+
+
+    <!--  Смотрим на изменение телесистемы  -->
+    document.getElementById("device-select").addEventListener("change",function(e){
+        var params = new FormData();
+        params.set('device_title', document.getElementById("device-select").value);
+        <!--    Заполнение коэффициентов пересчёта    -->
+        fetch('http://'+window.location.hostname+':'+window.location.port+'/axes/api/coef_device', {
+        method: 'POST',
+        body: params }).then(response=>response.json())
+        .then(data=>{
+                    document.getElementById("coef_gx").value = data.GX;
+                    document.getElementById("coef_gy").value = data.GY;
+                    document.getElementById("coef_gz").value = data.GZ;
+                    document.getElementById("coef_bx").value = data.BX;
+                    document.getElementById("coef_by").value = data.BY;
+                    document.getElementById("coef_bz").value = data.BZ;
+                    })});
+
+
+
+</script>
+
+
+{% endblock %}

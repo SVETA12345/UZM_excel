@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+<div style='display:flex; gap:60px'>
+  <div style="width:40%">
+    <h1>Последние обновления</h1>
+    <hr>
+    {% for post in page_obj %}
+      {% include 'includes/post.html' %}
+    {% endfor %}
+    <div>
+      {% include 'includes/paginator.html' %}
+    </div>
+  </div>
+    <div style="width:60%">
+      <h1>Обзор</h1>
+      <hr>
+      {% include 'includes/overview.html' %}
+    </div>
+</div>
+{% endblock %}

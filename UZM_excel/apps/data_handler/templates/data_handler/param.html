@@ -1,0 +1,440 @@
+{% extends 'data_handler/index.html' %}
+{% load static%}
+{% load index %}
+
+
+{%  block header %}
+    <link type="text/css" href="{% static 'css/data_handler/scroll.css' %}" rel="stylesheet"
+          xmlns="http://www.w3.org/1999/html"/>
+    <link type="text/css" href="{% static 'css/data_handler/toogle_switch.css' %}" rel="stylesheet"/>
+
+    {% load crispy_forms_tags %}
+{% endblock %}
+
+
+{% block data %}
+<div style="margin-top:1em">
+    <form action="" method="POST">
+        <div class="scroll-body form-row">
+            <div class="row">
+                <hr style="color:#FFC501;margin-top:1%;border-width: 3px">
+                <div class="col-9">
+                    <div class="row">
+                        <div class="col-10">
+                            <legend><b>Параметры скважины:</b> {{context.selected_obj}}</legend>
+                        </div>
+                        <div class="col text-end">
+                            <button id='btn_send' type="button" class="btn btn-primary" onclick="Send_report()">
+                                <i id='fa_send' class="fa fa-spinner fa-spin" hidden></i>Итоговый отчёт
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group col-md">
+                        <div class="form-group col-md">
+                            {{context.form.pad_name|as_crispy_field}}
+                        </div>
+                        <div class="form-group col-md">
+                            {{context.form.сontractor|as_crispy_field}}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-4">
+                            {{context.form.well_name|as_crispy_field}}
+                        </div>
+                        <div class="form-group col-md-4">
+                            {{context.form.status|as_crispy_field}}
+                        </div>
+                        <div class="form-group col-md-4">
+                            {{context.form.in_statistics|as_crispy_field}}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-4">
+                            {{context.form.well_type|as_crispy_field}}
+                        </div>
+                        <div class="form-group col-md-4">
+                            {{context.form.active_from|as_crispy_field}}
+                        </div>
+                        <div class="form-group col-md-4">
+                            {{context.form.status_drilling|as_crispy_field}}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-4">
+                            {{context.form.RKB|as_crispy_field}}
+                        </div>
+                        <div class="form-group col-md-4">
+                            {{context.form.VSaz|as_crispy_field}}
+                        </div>
+                        <div class="form-group col-md-4">
+                            {{context.form.coordinate_system|as_crispy_field}}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-3">
+                            {{context.form.latitude|as_crispy_field}}
+                        </div>
+                        <div class="form-group col-md-3">
+                            {{context.form.longtitude|as_crispy_field}}
+                        </div>
+                        <div class="form-group col-md-3">
+                            {{context.form.NY|as_crispy_field}}
+                        </div>
+                        <div class="form-group col-md-3">
+                            {{context.form.EX|as_crispy_field}}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-3">
+                            {{context.form.north_direction|as_crispy_field}}
+                        </div>
+                        <div class="form-group col-md-3">
+                            {{context.form.geomagnetic_model|as_crispy_field}}
+                        </div>
+                        <div class="form-group col-md-3">
+                            {{context.form.geomagnetic_date|as_crispy_field}}
+                        </div>
+                        <div class="form-group col-md-3">
+                            {{context.form.btotal|as_crispy_field}}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-3">
+                            {{context.form.dip|as_crispy_field}}
+                        </div>
+                        <div class="form-group col-md-3">
+                            {{context.form.dec|as_crispy_field}}
+                        </div>
+                        <div class="form-group col-md-3">
+                            {{context.form.grid_convergence|as_crispy_field}}
+                        </div>
+                        <div class="form-group col-md-3">
+                            {{context.form.total_correction|as_crispy_field}}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-6">
+                            {{context.form.gtotal|as_crispy_field}}
+                        </div>
+                        <div class="form-group col-md-6">
+                            {{context.form.critical_azimuth|as_crispy_field}}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col-md-3">
+                            {{context.form.T1_start|as_crispy_field}}
+                        </div>
+                        <div class="form-group col-md-3">
+                            {{context.form.T1_end|as_crispy_field}}
+                        </div>
+                        <div class="form-group col-md-3">
+                            {{context.form.T3_start|as_crispy_field}}
+                        </div>
+                        <div class="form-group col-md-3">
+                            {{context.form.T3_end|as_crispy_field}}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col-md-6">
+                            {{context.form.mail_To|as_crispy_field}}
+                        </div>
+                        <div class="form-group col-md-6">
+                            {{context.form.mail_Cc|as_crispy_field}}
+                        </div>
+                    </div>
+                    <div class="form-group col-md-12">
+                        {{context.form.comment|as_crispy_field}}
+                    </div>
+                </div>
+
+                <div class="col">
+                    <legend><b>Сводка:</b></legend>
+                    <div class="d-grid gap-2 mx-auto" style="overflow-y: auto; max-height:72em; border-radius: 15px; background-color: #9DB1CC;">
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#data_Modal3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-square-fill" viewBox="0 0 16 16">
+                                <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2zm6.5 4.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3a.5.5 0 0 1 1 0z"></path>
+                            </svg>
+                            Добавить
+                        </button>
+                        {% for comment in context.summary %}
+                        <div class="card border-dark mx-3" style="max-width: 18rem; max-width: none;">
+                            <div class="row card-header">
+                                <div class="col-8" style="vertical-align: middle;">
+                                {{comment.time}}
+                                </div>
+                                <div class="col-4" style="text-align: right">
+                                    <button type="button" class="btn btn-outline-danger" onclick="delete_summary({{comment.id}})">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                                            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z"></path>
+                                            <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1ZM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118ZM2.5 3h11V2h-11v1Z"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">{{comment.text}}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <br>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <hr style="color:#FFC501;margin-top:1%;border-width: 3px">
+                <legend><b>Стволы скважины:</b></legend>
+                <div class="row">
+                    {% for wellbore in context.cards %}
+                    <div class="col-sm-3" style="margin-top:1em;">
+                        <div class="card" style="width: 18rem;">
+                            <div class="card-header">
+                                <h5 class="card-title">{{wellbore.title}}</h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">Количество секций: {{wellbore.section_len}}</p>
+                                <p class="card-text">Замеров траектории ННБ: {{ wellbore.nnb_len }}</p>
+                                <p class="card-text">Замеров траектории ИГиРГИ: {{ wellbore.igirgi_len }}</p>
+                                <hr style="color:#FFC501;margin-top:1%;border-width: 3px">
+                                <label class="toggle">
+                                    {% if wellbore.obj.igirgi_drilling == True %}
+                                    <input class="toggle-checkbox" type="checkbox" onchange="igirgi_drilling({{wellbore.id}}, this.checked);" name="checkbox-report" checked >
+                                    {% else %}
+                                    <input class="toggle-checkbox" type="checkbox" onchange="igirgi_drilling({{wellbore.id}}, this.checked);" name="checkbox-report">
+                                    {% endif %}
+                                    <div class="toggle-switch"></div>
+                                    <span class="toggle-label">Бурение по траектории ИГиРГИ</span>
+                                </label>
+                            </div>
+                            <div class="card-footer">
+                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#data_Modal1"
+                                        data-wellbore="{{wellbore.id}}">
+                                    Клонировать </button>
+                                <button type="button" onclick="delete_wellbore({{wellbore.id}});" class="btn btn-danger">
+                                    Удалить</button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <div class="col-sm-3" style="margin-top:6.5em;">
+                        <div class="card" style="width: 18rem;">
+                            <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#data_Modal2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-square" viewBox="0 0 16 16">
+                                    <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                                </svg>
+                                Создать</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <br>
+        </div> <!--Конец скрола -->
+        <button type="submit" class="btn btn-primary" style="margin-top:1%;width:100%;">Подтвердить</button>
+    </form>
+</div>
+
+<!-- Модальные окна -->
+
+<!-- Модальное окно для создания ствола-->
+<div class="modal fade" id="data_Modal2" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered  modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Создание ствола</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="create_form">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="col-form-label">Скважина id: (отладочная информация)</label>
+                    <input class="form-control" name="well_name" value="{{context.selected_obj.id}}" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="col-form-label">Новый ствол:</label>
+                    <select class="form-select" name="wellbore">
+                        {% for choice in context.wellbore_choices %}
+                        <option value="{{choice.0}}">{{choice.1}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="create_wellbore()" class="btn btn-primary">Добавить</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- Модальное окно для клонирования ствола -->
+<div class="modal fade" id="data_Modal1" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered  modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Клонирование ствола</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="clone_form">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="col-form-label">Id ствола: (отладочная информация)</label>
+                    <input type="text" class="form-control" id="wellbore_id" name="wellbore_id" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="col-form-label">Новый ствол:</label>
+                    <select class="form-select" name="wellbore_name">
+                        {% for choice in context.wellbore_choices %}
+                        <option value="{{choice.0}}">{{choice.1}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="clone_wellbore()" class="btn btn-primary">Добавить</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для создания комментария в сводку-->
+<div class="modal fade" id="data_Modal3" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Комментарий сводки</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="{% url 'add_summary' %}" method="post" id="comm_form">
+                <input name="well_id" value="{{ context.selected_obj.id }}" hidden>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <textarea name='text' class="form-control" placeholder="Напишите комментарий" rows="5"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Добавить</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+<!--Функция для модального окна под клонирование-->
+$('#data_Modal1').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget)
+    var wellbore = button.data('wellbore') // Дополнительная информация из data-* атрибутов
+    document.getElementById('wellbore_id').value = wellbore;
+})
+
+function clone_wellbore(){
+    var params = new FormData(document.getElementById('clone_form'));
+    <!--    Запрос на создание моделей скважины, секций и рейсов     -->
+    fetch('http://'+window.location.hostname+':'+window.location.port+'/main_data/api/wellbore/clone',
+   { method: 'POST', body: params }).then(response => response.json()).then(data=>{
+            params = new FormData();
+            params.set('old_wellbore', data['old_wellbore']);
+            params.set('new_wellbore', data['new_wellbore']);
+            <!--    Запрос на копию замеров     -->
+                <!--       Копия осей     -->
+            fetch('http://'+window.location.hostname+':'+window.location.port+'/axes/api/wellbore_copy',
+                     { method: 'POST', body: params });
+                <!--       Копия траектории     -->
+            fetch('http://'+window.location.hostname+':'+window.location.port+'/report/api/wellbore_copy',
+                     { method: 'POST', body: params })
+                     .then(response=>response.json()).then(
+                     location.reload());
+   })};
+
+    <!--  Удалить ствол  -->
+    function delete_wellbore(){
+        fetch('http://'+window.location.hostname+':'+window.location.port+'/main_data/api/wellbore/'+arguments[0]+'/',
+         { method: 'DELETE', headers: {'X-CSRFToken':'wFH4wGagd3i0Ki79jrFo6CyUc5SsChbovphWCqSCK5Tl8MIvS17IS0D8Z1R1Yp69'}, })
+         .then(response => response.json()).then(location.reload());
+    }
+    <!--  Создать ствол  -->
+    function create_wellbore(){
+        var params = new FormData(document.getElementById('create_form'));
+        fetch('http://'+window.location.hostname+':'+window.location.port+'/main_data/api/wellbore/',
+        { method: 'POST', body: params}).then(response => response.json()).then(location.reload());
+    }
+    <!--  Удалить комментарий  -->
+    function delete_summary(id){
+        fetch('http://'+window.location.hostname+':'+window.location.port+'/main_data/api/well/summary?'+
+        new URLSearchParams({id: id}),
+        { method: 'DELETE'}).then(response => response.json()).then(location.reload());
+
+    }
+
+    <!--  Отслеживаем смену формата отчёта  -->
+    function igirgi_drilling(wellbore_id, status){
+        console.log('Меняем формат отчёта');
+        params = new FormData();
+        params.set('wellbore_id', wellbore_id);
+        params.set('status', status);
+
+
+        fetch('http://'+window.location.hostname+':'+window.location.port+'/main_data/api/well/igirgi_drilling',
+        { method: 'POST', body: params});
+    }
+
+
+    <!-- Отправка итогового отчёта -->
+    function Send_report() {
+        var Name = '{{context.selected_obj.pad_name.field.field_name}}_{{context.selected_obj.pad_name.pad_name}}_{{context.selected_obj.well_name}}';
+        console.log('Отправляем сообщение ', Name);
+
+        document.getElementById("fa_send").hidden = false;
+        <!--  Задаём в пост запрос номер рейса  -->
+        var params = new FormData();
+        params.set('run_id', sessionStorage.getItem("run_id"));
+
+        <!--    Приложение к отчёту    -->
+        fetch('http://'+window.location.hostname+':'+window.location.port+'/report/api/att_final_report',
+        { method: 'POST', body: params })
+         .then(response=>response.blob())
+         .then(data=>{
+            if(data.size != 0){
+            const anchorElement = document.createElement('a');
+            const url = window.URL.createObjectURL(data);
+            anchorElement.href = url;
+            anchorElement.download = Name+'_Приложение.xlsx';
+            anchorElement.click();
+            document.getElementById("fa_send").hidden = true;}
+        })
+
+        <!--    Отчёт    -->
+        fetch('http://'+window.location.hostname+':'+window.location.port+'/report/api/final_report',
+        { method: 'POST', body: params })
+         .then(response=>response.blob()).
+         then(data=>{
+            const anchorElement = document.createElement('a');
+            const url = window.URL.createObjectURL(data);
+            anchorElement.href = url;
+            anchorElement.download = Name+'_Финальный_отчёт.pptx';
+            anchorElement.click();
+            document.getElementById("fa_send").hidden = true;
+        })
+
+    }
+
+</script>
+
+{% endblock %}
+
+

@@ -1,0 +1,373 @@
+{% extends 'data_handler/index.html' %}
+{% load static %}
+
+<!-- templatetags для работы с объектами из разных таблиц по индексу -->
+{% load index %}
+{% load comment %}
+{% load id %}
+{% load floattags %}
+
+{%  block header %}
+<!--для скрола таблицы-->
+<link type="text/css" href="{% static 'css/data_handler/scroll.css' %}" rel="stylesheet" />
+<link type="text/css" href="{% static 'css/DragAndDropFile.css' %}" rel="stylesheet" />
+<!--для анимации кнопки загрузки-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+.fa {
+  margin-right: 0.15em;
+}
+</style>
+
+{% endblock %}
+
+{% block data %}
+
+<!-- ВЕРХНИИ КНОПКИ-->
+<div class="row" style="margin-top:1em;margin-right:0.1em;">
+    {% block top_btn %}
+    <div class="col-12" style="text-align: right;">
+        <div class="row justify-content-end">
+            <div class="col-auto"><b>Выбрано:</b> {{context.selected_obj}}</div>
+        </div>
+        <div style="margin-top:5px;text-align: right;">
+            {% if context.selected_obj.id is not None %}
+            <!--    Кнопка отвечает за отправку отчёта    -->
+            <button id='btn_send' type="button" class="btn btn-primary" onclick="Send_mail()">
+                <i id='fa_send' class="fa fa-spinner fa-spin" hidden></i>Отправить отчет
+            </button>
+            <!--    Кнопка отвечает за редактирование значений траектории    -->
+            <a href="{% url 'edit_dynamics' %}?run_id={{context.selected_obj.id}} " style="text-decoration: none;color: #000;">
+                <button type="button" class="btn btn-secondary" aria-controls="dtDynamicVerticalScrollExample">
+                Редактировать</button></a>
+            {% else %}
+            Выберите рейс в меню слева
+            {% endif %}
+        </div>
+    </div>
+    {% endblock %}
+</div>
+
+<!-- Для работы с таблицей как с формой-->
+    {% block tag_form %}
+    <form>
+    {% endblock %}
+
+<!-- ТАБЛИЦА -->
+<div class="scroll-table" style="margin-top: 0.5%;">
+    <div class="scroll-table-head">
+        <div class="row align-items-start">
+            {% block NnbTableHead%}
+            <div class="col-3">
+                <table class="table table-light table-sm table-bordered table-hover" style="">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th scope="col" colspan="3">{% if context.selected_obj.section.wellbore.igirgi_drilling %} Данные плана
+                            {% else %}Данные динамики ННБ{% endif %}</th>
+                    </tr>
+                    <tr >
+                        <th scope="col" style="font-size:0.8em">Глубина</th>
+                        <th scope="col" style="font-size:0.8em">Угол</th>
+                        <th scope="col" style="font-size:0.8em">Азимут</th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+            {% endblock %}
+            {% block IgirgiTableHead %}
+            <div class="col-3">
+                <table class="table table-light table-sm table-bordered table-hover" style="">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th scope="col" colspan="3">Данные динамики ИГиРГИ</th>
+                    </tr>
+                    <tr >
+                        <th scope="col" style="font-size:0.8em">Глубина</th>
+                        <th scope="col" style="font-size:0.8em">Угол</th>
+                        <th scope="col" style="font-size:0.8em">Азимут</th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+            {% endblock %}
+            {% block WasteTableHead %}
+            <div class="col-6">
+                <table class="table table-light table-sm table-bordered table-hover" style="">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th scope="col" colspan="3">Разница</th>
+                        <th scope="col" colspan="3">Отходы</th>
+                    </tr>
+                    <tr>
+                        <th scope="col" style="font-size:0.8em">∆Глубина</th>
+                        <th scope="col" style="font-size:0.8em">∆Угол</th>
+                        <th scope="col" style="font-size:0.8em">∆Азимут</th>
+                        <th scope="col" style="font-size:0.8em">По горизонтали</th>
+                        <th scope="col" style="font-size:0.8em">По вертикали</th>
+                        <th scope="col" style="font-size:0.8em">Общий</th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+            {% endblock %}
+    </div>
+    </div>
+    <div class="scroll-table-body" style="margin-top:0.1%;">
+        <div class="row align-items-start ">
+            {% block NnbTableBody%}
+            <div class="col-3">
+                <table name="table-data" class="table table-light table-sm table-bordered table-hover">
+                    <tbody>
+                    {% for meas in context.nnb_data%}
+                    <tr>
+                        <td id="nnb_depth{{ forloop.counter0 }}" scope="col">{{meas.depth|formatted_float}}</td>
+                        <td id="nnb_cor{{ forloop.counter0 }}" scope="col">{{meas.corner|formatted_float}}</td>
+                        <td id="nnb_azimut{{ forloop.counter0 }}" scope="col">{{meas.azimut|formatted_float}}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endblock %}
+            {% block IgirgiTableBody %}
+            <div class="col-3">
+                <table name="table-data" class="table table-light table-sm table-bordered table-hover">
+                    <tbody>
+                    {% for meas in context.igirgi_data%}
+                    <tr>
+                        <td id="igirgi_depth{{ forloop.counter0 }}" scope="col">{{meas.depth|formatted_float}}</td>
+                        <td id="igirgi_cor{{ forloop.counter0 }}" scope="col">{{meas.corner|formatted_float}}</td>
+                        <td id="igirgi_azimut{{ forloop.counter0 }}" scope="col">{{meas.azimut|formatted_float}}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endblock %}
+            <!--       Таблица с отходами и комментариями     -->
+            <div class="col-6">
+                <table name="table-data" class="table table-light table-sm table-bordered table-hover">
+                    <tbody>
+                    {% if 'delta_depth' in context %}
+                    <tr>
+                        <td>{{context.delta_depth}}</td>
+                        <td>{{context.delta_corner}}</td>
+                        <td>{{context.delta_azimut}}</td>
+                        <td>{{context.waste_hor}}</td>
+                        <td>{{context.waste_ver}}</td>
+                        <td>{{context.waste_common}}</td>
+                    </tr>
+                    {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- НИЖНИИ КНОПКИ-->
+{% block bottom_btn%}
+</form>
+
+{% if context.selected_obj is not None %} <!-- Не отображать кнопки добавления без выбранного рейса-->
+<div class="row" style="margin-top:0.5em;margin-right:0.1em;">
+    <div class="col-3" style="text-align: center;">
+        {% if context.selected_obj.section.wellbore.igirgi_drilling %}   <!-- На месте ННБ план, план считается сам!-->
+        {% else %}
+       <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#data_Modal1" style="width:100%"
+                data-whatever="Динамики ННБ" data-run="{{context.selected_obj}}">
+            Добавить значения
+        </button>
+        {% endif %}
+
+    </div>
+    <div class="col-3" style="text-align: center;">
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#data_Modal1" style="width:100%"
+               data-whatever="Динамики ИГиРГИ" data-run="{{context.selected_obj}}">
+            Добавить значения
+        </button>
+    </div>
+</div>
+{% endif %}
+
+<!-- Модальное окно для добавления новых замеров -->
+<div class="modal fade" id="data_Modal1" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Добавление данных</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action=""  method="post" name="data_form" onsubmit="return validate_form1(this)">
+            <div class="modal-body">
+                    <div class="form-group">
+                        <label for="data-name" class="col-form-label">Данные для:</label>
+                        <input type="text" class="form-control" id="data-name" name="data-type">
+                    </div>
+                    <div class="form-group">
+                        <label for="run-name" class="col-form-label">Рейс:</label>
+                        <input type="text" class="form-control" id="run-name" name="run" readonly>
+                    </div>
+                    <div class="form-group row">
+                        <div class="form-group col-md-12">
+                            <a class="tooltip-test" title="Вставьте значения глубины, зенитного и азимутального угла">
+                            <label>Данные:</label></a>
+                            <textarea class="form-control" rows="15"  name="data"></textarea>
+                        </div>
+
+                    </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Добавить</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+{% endblock%}
+
+<script>
+
+<!-- Отправка отчёта -->
+function Send_mail() {
+    console.log('Отправляем сообщение');
+    document.getElementById("fa_send").hidden = false;
+    <!--  Задаём в пост запрос номер рейса  -->
+    var params = new FormData();
+    params.set('run_id', {{context.selected_obj.id}});
+
+
+    fetch('http://'+window.location.hostname+':'+window.location.port+'/report/api/file_name',
+    { method: 'POST', body: params })
+    .then(response=>response.json()).
+    then(data=>{
+        var FileName = data['file_name'];
+        var Waste = data['waste'];
+        console.log(FileName);
+            <!--  Задаём в пост запрос имя файла на скачивании  -->
+            params = new FormData();
+            params.set('name', FileName);
+            <!--  Скачиваем файл  -->
+            fetch('http://'+window.location.hostname+':'+window.location.port+'/report/api/get_file',
+            { method: 'POST', body: params })
+            .then(response=>response.blob()).
+            then(data=>{
+                const anchorElement = document.createElement('a');
+                const url = window.URL.createObjectURL(data);
+                anchorElement.href = url;
+                anchorElement.download = String(FileName);
+                anchorElement.click();
+             })
+    <!-- Генерация письма в Outlook -->
+    const a_mail = document.createElement('a');
+    const url = 'mailto:{{context.letter.mailto}}&cc={{context.letter.cc}}&body={{context.letter.body}}'+
+    Math.abs(Waste['common'].toFixed(2))+'{{context.letter.comm_waste}}{{context.letter.hor_waste}}' +
+    Math.abs(Waste['hor'].toFixed(2))+' м '+ Waste['word']['hor'] +'{{context.letter.ver_waste}}'+
+    Math.abs(Waste['ver'].toFixed(2))+' м '+Waste['word']['ver']+
+    '{{context.letter.endbody}}&subject='+String(FileName).slice(0, -5);
+    a_mail.href = url;
+    a_mail.click();
+
+    document.getElementById("fa_send").hidden = true;
+    })
+}
+
+
+
+
+
+<!--Функция для модального окна под добавление замеров-->
+$('#data_Modal1').on('show.bs.modal', function (event) {
+  var button = $(event.relatedTarget) // Button that triggered the modal
+  var recipient = button.data('whatever') // Extract info from data-* attributes
+  var data = button.data('run')
+  var modal = $(this)
+  document.getElementById('run-name').value = data;
+  document.getElementById('data-name').value = recipient;
+
+  modal.find('.modal-title').text('Новые данные для ' + recipient)
+
+})
+
+<!-- Отправка данных через POST метод по view! -->
+<!-- Валидация при загрузке новых значений-->
+function validate_form1(form){
+    let valid = true;
+    let warning = [];
+    <!--  Глубина  -->
+<!--    let depth_array = form[2].value.split('\n');-->
+
+    <!--  Угол  -->
+    let corrner_array = form[3].value.split('\n');
+    corrner_array.forEach(function(element){
+        if( +element > 100 || +element < 0 ){
+            warning.push('Значения угла выходят за интервал (0, 100)');
+            }
+    });
+
+    <!--  Азимут  -->
+    let azimut_array = form[4].value.split('\n');
+    azimut_array.forEach(function(element){
+        if( Number(element) > 360 || Number(element) < 0 ){
+            warning.push('Значения азимута выходят за интервал (0, 360)');
+            }
+    });
+
+    if( warning.length > 0 ){
+        let Text = "При вставке значений возникли следующие ошибки:"
+        warning.forEach(function(element){
+                        Text = Text +'\n- '+ element
+                        });
+        Text = Text + '\nХотите продолжить?'
+        valid = confirm(Text);
+    }
+    console.log(warning);
+    console.log(valid);
+    return valid;
+}
+
+
+<!-- Загрзка страницы / Расчет разницы гулбина/углов/азимутов-->
+window.addEventListener('load', () => {
+
+    <!--  Разность глубин  -->
+    document.getElementsByName('delta0').forEach(function(element, ind){
+        let dif = parseFloat(document.getElementById('igirgi_depth'+ind).innerHTML.replace(",", "."))-
+        parseFloat(document.getElementById('nnb_depth'+ind).innerHTML.replace(",", "."));
+        element.innerHTML = dif.toFixed(2);
+        if(Math.abs(dif) > 0){
+            element.style.backgroundColor = '#facfcf';}
+        })
+
+    <!--  Разность углов  -->
+    document.getElementsByName('delta1').forEach(function(element, ind){
+        let dif = (parseFloat(document.getElementById('igirgi_cor'+ind).innerHTML.replace(",", "."))-
+        parseFloat(document.getElementById('nnb_cor'+ind).innerHTML.replace(",", "."))).toFixed(2);
+        element.innerHTML = dif;
+        if(Math.abs(dif) > 0.1){
+            element.style.backgroundColor = '#facfcf';}
+        })
+
+    <!--  Разность азимутов  -->
+    document.getElementsByName('delta2').forEach(function(element, ind){
+        let dif = parseFloat(document.getElementById('igirgi_azimut'+ind).innerHTML.replace(",", "."))-
+        parseFloat(document.getElementById('nnb_azimut'+ind).innerHTML.replace(",", "."));
+        if(dif > 300){
+            dif = dif -  360;
+            };
+        if(dif < -300){
+            dif = dif + 360;
+            };
+        element.innerHTML = dif.toFixed(2);
+        })
+});
+
+</script>
+{% endblock %}

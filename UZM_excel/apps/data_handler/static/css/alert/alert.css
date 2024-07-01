@@ -1,0 +1,16 @@
+
+.alert{
+  z-index: 9;
+  position: fixed;
+  top: 150px;
+  left: 0;
+  right: 0;
+  max-width: 360px;
+  margin: 0 auto;
+  transform: translateY(-250%);
+  transition: .5s;
+}
+
+.alert.active{
+    transform: translateY(0);
+}

@@ -1,0 +1,51 @@
+{% extends 'Field/addModal.html' %}
+{% load static%}
+
+{%  block header %}
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link type="text/css" href="{% static 'css/run/styles.css' %}" rel="stylesheet" />
+    {% load crispy_forms_tags %}
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+{% endblock %}
+
+{% block data_field %}
+
+<div id="main_form">
+{% for f in context.form %}
+    <div class="container__item">
+        {% if f.label == 'Скважина' %}  <!-- пропускаем поле Куст (добавили его выше с фильтром) -->
+        <div class="form-group">
+            <label>Скважина</label>
+            <select class="js-select2 form-control" name="well_name" placeholder="Выберите скважину">
+                <option value=""></option>
+                {% for element in context.search%}
+                <option value="{{element.id}}"> {{ element }} </option>
+                {% endfor %}
+            </select>
+        </div>
+        {% else %}
+        {{f|as_crispy_field}}
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+
+<!--  Для поиска  -->
+
+<script>
+    $(document).ready(function() {
+    	$('.js-select2').select2({
+    			placeholder: "Выберите скважину",
+    					maximumSelectionLength: 2,
+    							language: "ru"
+    								});
+    								});
+</script>
+
+
+{% endblock%}
+
+

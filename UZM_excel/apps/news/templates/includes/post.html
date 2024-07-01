@@ -1,0 +1,25 @@
+<head>
+    <title>{{ post.title }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 20px;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        p {
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h2>{{ post.title }}</h2>
+    <p><strong>Автор:</strong> {{ post.author }} | <strong>{{ post.pub_date|date:"d E Y" }}</strong></p>
+    <p>{{ post.text|linebreaks }}</p>
+</body>
+<hr>

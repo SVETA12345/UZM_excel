@@ -1,0 +1,48 @@
+.scroll-table-body {
+	height: 32em;
+	width: 99%;
+	overflow-y: scroll;
+	overflow-x: hidden;
+}
+
+/* Для страницы с параметарми! */
+.scroll-body {  /*Скрол по аналогии с таблице для div*/
+	max-height: 75vh;
+	width: 100%;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+.scroll-table-head {
+	width: 98%;
+}
+
+.scroll-table table {
+	width: 100%;
+}
+.scroll-table thead th {
+    width: 10em;
+    text-align: center;
+    vertical-align: middle;
+
+}
+.scroll-table tbody td {
+    width: 10em;
+    text-align: center;
+    vertical-align: middle;
+}
+
+@media screen and (min-width: 2200px) {
+    .scroll-table-body {
+	height: 47em;
+	overflow-x: hidden;
+    }
+}
+
+
+@media screen and (min-width: 3200px) {
+    .scroll-table-body {
+	height: 75em;
+	overflow-x: hidden;
+    }
+}

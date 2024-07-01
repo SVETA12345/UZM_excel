@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load cache %}
+
+{% block content %}
+<style>
+.nav-pills .nav-link.active, .nav-pills .show>.nav-link{
+    color: var(--bs-nav-pills-link-active-color);
+    background-color: #fdb30d;}
+
+.link {
+    text-decoration: none;
+}
+
+body{ overflow: hidden; }
+</style>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container-fluid">
+      <ul class="nav nav-pills m-auto">
+          <li class="nav-item">
+              <a href="{% url 'param' %}" class="nav-link {% if context.active == 'param' %}active{% endif %}" style="font-size:large">Общие параметры</a>
+          </li>
+          <li class="nav-item">
+              <a href="{% url 'run_param' %}" class="nav-link {% if context.active == 'run' %}active{% endif %}" style="font-size:large">Рейс</a>
+          </li>
+          <li class="nav-item active">
+              <a href="{% url 'plan' %}" class="nav-link {% if context.active == 'plan' %}active{% endif %}" style="font-size:large">Плановая траектория</a>
+          </li>
+
+          <li class="nav-item">
+              <a href="{% url 'traj' %}" class="nav-link {% if context.active == 'traj'%}active{% endif %}" style="font-size:large">Траектории</a>
+          </li>
+
+          <li class="nav-item">
+              <a href="{% url 'dynamics' %}" class="nav-link {% if context.active == 'dynamics'%}active{% endif %}" style="font-size:large">Динамика</a>
+          </li>
+
+          <li class="nav-item">
+              <a href="{% url 'proj' %}" class="nav-link {% if context.active == 'proj'%}active{% endif %}" style="font-size:large">Проекции</a>
+          </li>
+      </ul>
+  </div>
+</nav>
+
+<div class="row" style="margin: 0em;">
+    {% block left_panel %}
+    <div class="col-2">
+        <!-- Дерево -->
+        <div class="header">
+            <h5 class="title">
+                Выбор модели
+            </h5>
+        </div>
+        <div class="body">
+            {% cache 500 navmenu %}
+            <input class="form-control me-2" type="search" placeholder="Поиск..." onchange="search(this.value);">
+            <br>
+            <div style="overflow-y: auto; max-height:80vh;">
+                <div id="search-field" hidden> <!-- Поле для поиска -->
+                    {% for run in context.tree.search %}
+                    <ul>
+                        <a href="?run_id={{run.id}}" onclick="
+                            SetClient({{run.section.wellbore.well_name.pad_name.field.client.id}});
+                            SetField({{run.section.wellbore.well_name.pad_name.field.id}});
+                            SetPad({{run.section.wellbore.well_name.pad_name.id }});
+                            SetWell({{run.section.wellbore.well_name.id }});
+                            SetWellbore({{run.section.wellbore.id}});
+                            SetSection({{run.section.id}});
+                            SetRun({{run.id}});">
+                            <li class="run_search" hidden>{{ run }}</li>
+                        </a>
+                    </ul>
+                    {% endfor %}
+                </div>
+                <div id="menu-field"> <!-- Поле для меню -->
+                    {% for dict in context.tree.main %}
+                    <div class="DO" id='tree'>
+                        <button class="collapsed btn btn-toggle" data-bs-toggle="collapse" onclick="SetClient({{dict.id}})" href="#Client{{dict.id}}">
+                            {{dict.client}}
+                        </button>
+                        <ul class="collapse" id="Client{{dict.id}}">
+                            {% for field_dict in dict.fields %}
+                            <!--      Месторождение      -->
+                            <li style="cursor: pointer;"><span class="collapsed" data-bs-toggle="collapse" onclick="SetField({{field_dict.id}})" href="#Field{{field_dict.id}}">
+                                {{field_dict.field_name}}</span>
+                                <ul class="collapse" id="Field{{field_dict.id}}">
+                                    {% for pad_dict in field_dict.pads %}
+                                    <!--      Куст      -->
+                                    <li style="cursor: pointer;"><span  class="collapsed" data-bs-toggle="collapse" onclick="SetPad({{pad_dict.id}})" href="#Pad{{pad_dict.id}}">Куст {{pad_dict.pad_name}}</span>
+                                        <ul class="collapse" id="Pad{{pad_dict.id}}">
+                                            {% for well_dict in pad_dict.wells %}
+                                            <!--      Скважина      -->
+                                            <li style="cursor: pointer;"><span  class="collapsed" data-bs-toggle="collapse" onclick="SetWell({{well_dict.id}})" href="#Well{{well_dict.id}}">Скв. {{well_dict.well_name}}</span>
+                                                <ul class="collapse" id="Well{{well_dict.id}}">
+                                                    {% for wellbore_dict in well_dict.wellbores %}
+                                                    <!--      Ствол     -->
+                                                    <li style="cursor: pointer;"><span  class="collapsed" data-bs-toggle="collapse" onclick="SetWellbore({{wellbore_dict.id}})" href="#Wellbore{{wellbore_dict.id}}">Ствол {{wellbore_dict.wellbore}}</span>
+                                                        <ul class="collapse" id="Wellbore{{wellbore_dict.id}}">
+                                                            {% for section_dict in wellbore_dict.sections %}
+                                                            <!--      Секция      -->
+                                                            <li style="cursor: pointer;"><span  class="collapsed" data-bs-toggle="collapse" onclick="SetSection({{section_dict.id}})" href="#Section{{section_dict.id}}">{{section_dict.section}}</span>
+                                                                <ul class="collapse run" id="Section{{section_dict.id}}">
+                                                                    {% for run_dict in section_dict.runs %}
+                                                                    <!--      Рейс      -->
+                                                                    <li style="cursor: pointer;"><a href="?run_id={{run_dict.id}}" id='Run{{run_dict.id}}' onclick="SetRun({{run_dict.id}})" class="run"> Рейс {{run_dict.run_number}} </a>
+                                                                    </li>
+                                                                    {% endfor %}
+                                                                </ul>
+                                                            </li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                    </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endcache %}
+        </div>
+    </div>
+
+    <div class="col">
+        {% block data %}
+        {% endblock %}
+    </div>
+    {% endblock %}
+</div>
+
+
+<script src="{% static 'js/nav_menu.js'%}"></script>
+
+<script>
+<!-- Поиск в дереве -->
+function search(string) {
+  filter = string.replace(/\s+/g, ' ').trim().toUpperCase();
+  let elementList = document.querySelectorAll('.run_search');
+  for (let elem of elementList) {
+    elem.hidden = false;
+    for (let str of filter.split(' ')) {
+      if (elem.innerText.toUpperCase().indexOf(str) == -1){
+      elem.hidden = true;
+      }
+    }
+
+  }
+  if (string != '') {
+    document.getElementById('menu-field').hidden = true;
+    document.getElementById('search-field').hidden = false;
+    } else {
+    document.getElementById('menu-field').hidden = false;
+    document.getElementById('search-field').hidden = true;
+    }
+}
+
+<!-- Новое дерево открываем выбранный элемент -->
+window.addEventListener('load', () => {
+  if (sessionStorage.getItem("client_id") !== null) {
+    var selected_client = document.getElementById('Client'+ sessionStorage.getItem("client_id"));
+    selected_client.classList.add('show');
+    selected_client.parentNode.style.background= "linear-gradient(to right, yellow 1%, transparent 5%)";
+  }
+  if (sessionStorage.getItem("field_id") !== null) {
+    var selected_field = document.getElementById('Field'+ sessionStorage.getItem("field_id"));
+    selected_field.classList.add('show');
+    }
+  if (sessionStorage.getItem("pad_id") !== null) {
+    var selected_pad = document.getElementById('Pad'+ sessionStorage.getItem("pad_id"));
+    selected_pad.classList.add('show');
+    }
+  if (sessionStorage.getItem("well_id") !== null) {
+    var selected_well = document.getElementById('Well'+ sessionStorage.getItem("well_id"));
+    selected_well.classList.add('show');
+    }
+  if (sessionStorage.getItem("wellbore_id") !== null) {
+    var selected_wellbore = document.getElementById('Wellbore'+ sessionStorage.getItem("wellbore_id"));
+    selected_wellbore.classList.add('show');
+    }
+  if (sessionStorage.getItem("section_id") !== null) {
+    var selected_section = document.getElementById('Section'+ sessionStorage.getItem("section_id"));
+    selected_section.classList.add('show');
+    }
+  if (sessionStorage.getItem("run_id") !== null) {
+    var selected_run = document.getElementById('Run'+ sessionStorage.getItem("run_id"));
+    selected_run.classList.add('show');
+    selected_run.parentNode.style.background = "linear-gradient(to right, yellow 40%, transparent 80%)"; }
+});
+
+
+
+<!-- Записываем в session storage объекты которые храним -->
+function SetClient(id){
+    sessionStorage.setItem("client_id", id)
+}
+
+function SetField(id){
+    sessionStorage.setItem("field_id", id)
+}
+
+function SetPad(id){
+    sessionStorage.setItem("pad_id", id)
+}
+
+function SetWell(id){
+    sessionStorage.setItem("well_id", id)
+}
+
+function SetWellbore(id){
+    sessionStorage.setItem("wellbore_id", id)
+}
+
+function SetSection(id){
+    sessionStorage.setItem("section_id", id)
+}
+
+function SetRun(id){
+    sessionStorage.setItem("run_id", id)
+}
+</script>
+{% endblock %}
+

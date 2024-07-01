@@ -1,0 +1,264 @@
+{% extends 'data_handler/index.html' %}
+{% load static %}
+{% load index %}
+
+{%  block header %}
+<!--для скрола таблицы-->
+<link type="text/css" href="{% static 'css/data_handler/scroll.css' %}" rel="stylesheet" />
+
+<!--для анимации кнопки загрузки-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+.fa {
+  margin-right: 0.15em;
+}
+</style>
+
+{% endblock %}
+
+{% block data %}
+
+<!-- ВЕРХНИИ КНОПКИ-->
+<div class="row" style="margin-top:1em;margin-right:0.1em;">
+    <div class="col-7">
+        <div class="row">
+            <div class="col-8"><b>Выбрано:</b></div>
+            <div class="col-3"><b>Версия плана:</b></div>
+        </div>
+
+        <div class="row">
+            <div class="col-8">{{context.selected_obj}}</div>
+            <div class="col-3">{{context.plan_version}}</div>
+        </div>
+    </div>
+    <div class="col-5" style="text-align: right;">
+        {% block top_button%}
+        <br>
+        {% if context.selected_obj is not None %}
+        <!--    Кнопка отвечает за загрузку плановой траектории    -->
+        {% if context.plan_ex == True %}
+        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#data_Modal2" data-run="{{context.selected_obj}}">
+            Заменить план
+        </button>
+        <!--    Кнопка отвечает за удаление плана    -->
+        <button id='btn_send' type="button" class="btn btn-danger" onclick="delete_plan({{context.selected_obj.id}})">Удалить план
+        </button>
+        {% else %}
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#data_Modal2" data-run="{{context.selected_obj}}">
+            Добавить план
+        </button>
+        {% endif %}
+
+        <!--    Кнопка отвечает за редактирование значений траектории    -->
+        <button type="button" class="btn btn-secondary" placeholder="" disabled>
+            Редактировать
+        </button>
+        {% else %}
+        Выберите рейс в меню слева
+        {% endif %}
+        {% endblock %}
+    </div>
+</div>
+
+<!-- ТАБЛИЦА -->
+<div class="scroll-table" style="margin-top: 0.5%;">
+    <div class="scroll-table-head">
+        <div class="row align-items-start">
+            <div class="col-12">
+                <table class="table table-light table-sm table-bordered table-hover" style="">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th scope="col" colspan="3">Плановая траектория</th>
+                    </tr>
+                    <tr >
+                        <th scope="col">Глубина</th>
+                        <th scope="col">Угол</th>
+                        <th scope="col">Азимут</th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="scroll-table-body" style="margin-top:0.1%;">
+        <div class="row align-items-start ">
+
+            <div class="col-12">
+                <table name="table-data" class="table table-light table-sm table-bordered table-hover">
+                    <tbody>
+                    {% for meas in context.plan%}
+                    <tr>
+                        <td id="plan_depth{{ forloop.counter0 }}" scope="col">{{meas.depth}}</td>
+                        <td id="plan_cor{{ forloop.counter0 }}" scope="col">{{meas.corner}}</td>
+                        <td id="plan_azimut{{ forloop.counter0 }}" scope="col">{{meas.azimut}}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- НИЖНИИ КНОПКИ-->
+{% block bottom_button%}
+</form>
+
+<!-- Модальное окно для загрузки плановой траектории -->
+<div class="modal fade" id="data_Modal2" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Загрузка плановой траектории</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action=""  method="post" name="data_form" enctype="multipart/form-data"
+            onsubmit="return validate_plan_form(this);">
+            <div class="modal-body">
+                    <div class="form-group">
+                        <label class="col-form-label">Рейс:</label>
+                        <input type="text" class="form-control" name="run" id="run_name" disabled>
+                    </div>
+                    <div class="form-group row">
+                        <div class="form-group col-md-6">
+                            <div style="vertical-align: baseline;">
+                                <a class="tooltip-test" title="Добавьте файл с замерами">
+                                    <label class="col-form-label">Файл:</label></a>
+                                <input class="form-control" type="file" accept=".xls,.xlsx" name="plan_file">
+
+                                <a class="tooltip-test" title="Версия плана для идентификации">
+                                <label class="col-form-label">Версия плана:</label></a>
+                                <input class="form-control" type="text" name="plan_version" value="{{context.plan_version}}">
+                            </div>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <div class="form-group">
+                                <a class="tooltip-test" title="Буквенный индекс колонки с глубинами. Пример: 'A'">
+                                <label class="col-form-label">Глубина:</label></a>
+                                <input type="text" class="form-control" name="plan_depth">
+                            </div>
+                            <div class="form-group">
+                                <a class="tooltip-test" title="Буквенный индекс колонки с зенитным углом. Пример: 'A'">
+                                <label class="col-form-label">Угол:</label></a>
+                                <input type="text" class="form-control" name="plan_corner">
+                            </div>
+                            <div class="form-group">
+                                <a class="tooltip-test" title="Буквенный индекс колонки с азимутальным углом. Пример: 'A'">
+                                <label class="col-form-label">Азимут:</label></a>
+                                <input type="text" class="form-control" name="plan_azimut">
+                            </div>
+                            <div class="form-group">
+                                <a class="tooltip-test" title="Числовой индекс строки, с которой начинается считывание. Пример: '32'">
+                                <label class="col-form-label">Строка:</label></a>
+                                <input type="text" class="form-control" name="plan_str">
+                            </div>
+                            <div class="form-group">
+                                <a class="tooltip-test" title="Текстовое наименование страницы с данными. Пример: 'Planned WGR'">
+                                <label class="col-form-label">Лист:</label></a>
+                                <input type="text" class="form-control" name="plan_list_name">
+                            </div>
+                        </div>
+                    </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Загрузить</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock%}
+
+<script>
+
+    <!-- Валидация формы под загрузку плана-->
+    function validate_plan_form(form){
+        valid = true;
+        if (form.plan_file.value == "" ){
+        alert ("Пожалуйста загрузите файл с плановой  траекторией в поле 'Файл'." );
+        valid = false;}
+        if (form.plan_depth.value == "" ){
+        alert ( "Пожалуйста заполните поле 'Глубина'." );
+        valid = false;}
+        if (form.plan_corner.value == "" ){
+        alert ( "Пожалуйста заполните поле 'Угол'." );
+        valid = false;}
+        if (form.plan_azimut.value == "" ){
+        alert ( "Пожалуйста заполните поле 'Азимут'." );
+        valid = false;}
+        if (form.plan_list_name.value == "" ){
+        alert ( "Пожалуйста заполните поле 'Лист'." );
+        valid = false;}
+        if (form.plan_str.value == "" ){
+        alert ( "Пожалуйста заполните поле 'Строка'." );
+        valid = false;}
+
+        return valid;
+    }
+
+    <!-- Функция поиска -->
+    function SearchFilter() {
+      // Объявление переменных
+      var input, filter, tables, tr, td, i, txtValue;
+      input = document.getElementById("SearchInput");
+      filter = input.value.toUpperCase();
+      tables = document.getElementsByName("table-data");
+      tr1 = tables[0].getElementsByTagName("tr");
+      tr2 = tables[1].getElementsByTagName("tr");
+
+      // Цикл по всем строкам таблицы и сокрытие данных, что не подходят под поиск
+      for (i = 0; i < tr1.length; i++) {
+        td = tr1[i].getElementsByTagName("td")[0];
+        if (td) {
+          txtValue = td.textContent || td.innerText;
+          if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            tr1[i].style.display = "";
+          } else {
+            tr1[i].style.display = "none";
+          }
+        }
+      }
+
+    }
+
+    <!--Функция для модального окна под загрузку плана-->
+    $('#data_Modal2').on('show.bs.modal', function (event) {
+      var button = $(event.relatedTarget)
+      var recipient = button.data('whatever')
+
+      var params = new FormData();
+      params.set('run_id', {{context.selected_obj.id}});
+      fetch('http://'+window.location.hostname+':'+window.location.port+'/report/api/run_index', { method: 'POST', body: params })
+             .then(response=>response.json()).
+             then(data=>{
+             console.log(data);
+             console.log(data.plan_depth);
+             document.getElementsByName('plan_depth')[0].value=data.plan_depth;
+             document.getElementsByName('plan_corner')[0].value=data.plan_corner;
+             document.getElementsByName('plan_azimut')[0].value=data.plan_azimut;
+             document.getElementsByName('plan_str')[0].value=data.plan_str;
+             document.getElementsByName('plan_list_name')[0].value=data.plan_list_name;
+             });
+
+      var run_name = button.data('run')
+      var modal = $(this)
+      document.getElementById('run_name').value = run_name;
+    })
+
+    function delete_plan(id) {
+        var params = new FormData();
+        params.set('run_id', id);
+        fetch('http://'+window.location.hostname+':'+window.location.port+'/report/api/plan_del', { method: 'POST', body: params })
+        .then(response=>response.json()).
+        then(data=>{location.reload();});
+    }
+</script>
+{% endblock %}

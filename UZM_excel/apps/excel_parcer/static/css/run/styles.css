@@ -1,0 +1,33 @@
+.container {
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  max-width: 450px;
+}
+
+.container__item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-bottom: 20px;
+}
+
+.container__label {
+  text-align: center;
+  padding-bottom: 10px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.container__selector {
+  height: 30px;
+}
+
+.container__button {
+  height: 30px;
+  width: 150px;
+  align-self: center;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}

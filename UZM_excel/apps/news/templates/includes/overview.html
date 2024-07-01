@@ -1,0 +1,73 @@
+﻿<table  class="table table-light table-sm table-bordered table-hover"
+      name="table_axes">
+
+  <thead class="thead-dark">
+    <tr class="table" style="text-align: center;">
+      <th scope="col">Заказчик</th>
+      <th scope="col">Месторождение</th>
+      <th scope="col">Куст</th>
+      <th scope="col">Скважина</th>
+      <th scope="col">Ствол</th>
+      <th scope="col">Секция</th>
+      <th scope="col">Рейс</th>
+      <th scope="col">Статус</th>
+      <th scope="col">Фаза</th>
+      <th scope="col">Последний замер</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {% for run in runs_to_context %}
+    <tr>
+      <td id="client{{ forloop.counter0 }}" scope="col">{{run.client}}</td>
+      <td id="field{{ forloop.counter0 }}" scope="col">{{run.field}}</td>
+      <td id="pad{{ forloop.counter0 }}" scope="col">{{run.pad}}</td>
+      <td id="well{{ forloop.counter0 }}" scope="col"><a href="axes" onclick="SetClient({{run.client_id}});
+                                                                             SetField({{run.field_id}});
+                                                                             SetPad({{run.pad_id }});
+                                                                             SetWell({{run.well_id }});
+                                                                             SetWellbore({{run.wellbore_id}});
+                                                                             SetSection({{run.section_id}});
+                                                                             SetRun({{run.run_id}});">{{run.well}}</td>
+      <td id="wellbore{{ forloop.counter0 }}" scope="col">{{run.wellbore}}</td>
+      <td id="section{{ forloop.counter0 }}" scope="col">{{run.section}}</td>
+      <td id="run{{ forloop.counter0 }}" scope="col">{{run.run_number}}</a></td>
+      <td id="status{{ forloop.counter0 }}" scope="col">{{run.status}}</td>
+      <td id="active{{ forloop.counter0 }}" scope="col">{{run.active}}</td>
+      <td id="last_survey{{ forloop.counter0 }}" scope="col">{{run.last_survey}}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+
+</table>
+
+<script>
+<!-- Записываем в session storage объекты которые храним -->
+function SetClient(id){
+    sessionStorage.setItem("client_id", id)
+}
+
+function SetField(id){
+    sessionStorage.setItem("field_id", id)
+}
+
+function SetPad(id){
+    sessionStorage.setItem("pad_id", id)
+}
+
+function SetWell(id){
+    sessionStorage.setItem("well_id", id)
+}
+
+function SetWellbore(id){
+    sessionStorage.setItem("wellbore_id", id)
+}
+
+function SetSection(id){
+    sessionStorage.setItem("section_id", id)
+}
+
+function SetRun(id){
+    sessionStorage.setItem("run_id", id)
+}
+</script>

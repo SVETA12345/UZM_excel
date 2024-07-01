@@ -1,0 +1,84 @@
+
+.chart-header{
+  font-size:16px;
+  padding: 10px;
+}
+.chart-container{
+    position: relative;
+    z-index: 2;
+    width:1250px;
+    padding-left: 15px;
+    padding-right: 15px;
+    margin: auto;
+    padding-top: 30px;
+  
+}
+.container-square{
+  width:50%;
+  margin-left: 25px;
+} 
+
+.container-projections{
+  max-width: 1100px;
+  display: flex;
+  flex-direction: row;
+  margin-top: 10px;
+}
+.status{
+  color:#FED602;
+  font-size: 18px;
+  margin-right: 900px;
+  padding-bottom: 20px ;
+}
+.container-form{
+    margin-bottom: auto;
+    border:5px solid rgba(224, 217, 217, 0.734);
+    border-radius: 35px;
+    margin-bottom: 20px;
+
+}
+#grafica1 {
+    z-index: 9;
+    font-weight: bold;
+    color: #ffffff;
+    
+  }
+
+#grafica2 {
+    z-index: 9;
+    font-weight: bold;
+    color: #ffffff;
+    padding-left: 20px;
+    
+  }
+.container-btn{
+    margin-left: 830px;
+    margin-bottom: 20px;
+  }
+.containeк_btn_proj{
+   margin-bottom: 20px;
+   margin-top: 10px;
+  }
+
+input{
+    width:70px;
+}
+#undo,#sbtn,#sbtnGtotal,#sbtnB,#sbtnBt, #sbtnHSTF, #sbtnDip, #undoGtotal,#undoB,#undoBt,#undoHSTF,#undoDip,#sbtnHor,#sbtnVer,#undoHor,#undoVer{
+     display: inline-block;
+     text-align:center;
+     font-size:16px;
+     line-height: 10px;
+     color: white;
+     text-decoration: none;
+     padding: .1em 1em;
+     outline: none;
+     border-width: 4px 0;
+     height: 30px;
+     border-style: solid none;
+     border-color: #F6CF00 #000 #fed40239;
+     border-radius: 5px;
+     background: linear-gradient(#F6CF00, #f6cd0087) #E38916;
+     transition: 0.4s;
+}
+#undo:hover,#sbtn:hover { background: linear-gradient(#f5ae00, #f59500) #f5ae00; }
+#undo:active,#sbtn:active { background: linear-gradient(#f59500, #f5ae00) #f59500; }

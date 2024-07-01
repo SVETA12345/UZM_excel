@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{%  block header %}
+    <link type="text/css" href="{% static 'css/run/styles.css' %}" rel="stylesheet" />
+    {% load crispy_forms_tags %}
+{% endblock %}
+
+
+{% block content %}
+<br>
+<form class="container" method="post">
+        {% block data_field %}
+        {{ context.form|crispy }}
+        {% endblock %}
+        <br>
+      <button type="submit" class="btn btn-secondary">Добавить</button>
+</form>
+
+<hr style="color:#FFC501;margin-top:1%;border-width: 3px">
+
+<div class="container__item">
+        <div class="mx-auto">
+            <table  class="table table-light  table-bordered table-hover" name="table_calculation" style="margin-top:2%">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Название</th>
+                        <th scope="col">GX</th>
+                        <th scope="col">GY</th>
+                        <th scope="col">GZ</th>
+                        <th scope="col">BX</th>
+                        <th scope="col">BY</th>
+                        <th scope="col">BZ</th>
+                        <th scope="col">Функция</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for telesystem in context.telesystem %}
+                    <tr>
+                        <td scope="col"> {{telesystem.device_title}} </td>
+                        <td scope="col"> {{telesystem.CX}} </td>
+                        <td scope="col"> {{telesystem.CY}} </td>
+                        <td scope="col"> {{telesystem.CZ}} </td>
+                        <td scope="col"> {{telesystem.BX}} </td>
+                        <td scope="col"> {{telesystem.BY}} </td>
+                        <td scope="col"> {{telesystem.BZ}} </td>
+                        <td scope="col"> <button type='button' onclick="delete_telesystem({{telesystem.id}})"> Удалить </button></td>
+                    </tr>
+                    {% endfor %}
+                 </tbody>
+            </table>
+        </div>
+    </div>
+
+<script>
+<!-- Функция по удалению телеистемы(device)-->
+function delete_telesystem(){
+    var params = new FormData();
+    params.set('device_id', arguments[0]);
+
+    fetch('http://'+window.location.hostname+':'+window.location.port+'/axes/api/device_del', {
+        method: 'POST',
+        body: params }).then(response=>response.json())
+        .then(data=>{location.reload();});
+}
+</script>
+{% endblock %}

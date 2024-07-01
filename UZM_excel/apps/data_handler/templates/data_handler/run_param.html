@@ -1,0 +1,228 @@
+{% extends 'data_handler/index.html' %}
+{% load static%}
+{% load index %}
+
+
+{%  block header %}
+    <link type="text/css" href="{% static 'css/data_handler/scroll.css' %}" rel="stylesheet"
+          xmlns="http://www.w3.org/1999/html"/>
+    <link type="text/css" href="{% static 'css/data_handler/toogle_switch.css' %}" rel="stylesheet"/>
+
+    {% load crispy_forms_tags %}
+{% endblock %}
+
+
+{% block data %}
+<div style="margin-top:1em">
+    <form action="" method="POST">
+        <div class="scroll-body form-row">
+            <div class="row">
+                <hr style="color:#FFC501;margin-top:1%;border-width: 3px">
+                <div class="col">
+                    <legend><b>Параметры рейса:</b> {{context.selected_obj}}</legend>
+                    <div class="row">
+                        <div class="form-group col-md-6">
+                            {{context.form.run_number|as_crispy_field}}
+                        </div>
+                        <div class="form-group col-md-6">
+                            {{context.form.section|as_crispy_field}}
+                        </div>
+                    </div>
+                    <div class="row">
+                        {{context.form.dd_contractor_name|as_crispy_field}}
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-3">
+                            {{context.form.start_date|as_crispy_field}}
+                        </div>
+                        <div class="form-group col-md-3">
+                            {{context.form.end_date|as_crispy_field}}
+                        </div>
+                        <div class="form-group col-md-3">
+                            {{context.form.start_depth|as_crispy_field}}
+                        </div>
+                        <div class="form-group col-md-3">
+                            {{context.form.end_depth|as_crispy_field}}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-3">
+                            {{context.form.in_statistics|as_crispy_field}}
+                        </div>
+                        <div class="form-group col-md-3">
+                            {{context.form.memory|as_crispy_field}}
+                        </div>
+                        <div class="form-group col-md-3">
+                            {{context.form.bha|as_crispy_field}}
+                        </div>
+                        <div class="form-group col-md-3">
+                            {{context.form.sag|as_crispy_field}}
+                        </div>
+                    </div>
+            </div>
+
+        </div> <!--Конец скрола -->
+        <button type="submit" class="btn btn-primary" style="margin-top:1%;width:100%;">Подтвердить</button>
+    </form>
+</div>
+
+<!-- Модальные окна -->
+
+<!-- Модальное окно для создания ствола-->
+<div class="modal fade" id="data_Modal2" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered  modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Создание ствола</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="create_form">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="col-form-label">Скважина id: (отладочная информация)</label>
+                    <input class="form-control" name="well_name" value="{{context.selected_obj.id}}" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="col-form-label">Новый ствол:</label>
+                    <select class="form-select" name="wellbore">
+                        {% for choice in context.wellbore_choices %}
+                        <option value="{{choice.0}}">{{choice.1}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="create_wellbore()" class="btn btn-primary">Добавить</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- Модальное окно для клонирования ствола -->
+<div class="modal fade" id="data_Modal1" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered  modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Клонирование ствола</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="clone_form">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="col-form-label">Id ствола: (отладочная информация)</label>
+                    <input type="text" class="form-control" id="wellbore_id" name="wellbore_id" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="col-form-label">Новый ствол:</label>
+                    <select class="form-select" name="wellbore_name">
+                        {% for choice in context.wellbore_choices %}
+                        <option value="{{choice.0}}">{{choice.1}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="clone_wellbore()" class="btn btn-primary">Добавить</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для создания комментария в сводку-->
+<div class="modal fade" id="data_Modal3" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Комментарий сводки</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="{% url 'add_summary' %}" method="post" id="comm_form">
+                <input name="well_id" value="{{ context.selected_obj.id }}" hidden>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <textarea name='text' class="form-control" placeholder="Напишите комментарий" rows="5"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Добавить</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+<!--Функция для модального окна под клонирование-->
+$('#data_Modal1').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget)
+    var wellbore = button.data('wellbore') // Дополнительная информация из data-* атрибутов
+    document.getElementById('wellbore_id').value = wellbore;
+})
+
+function clone_wellbore(){
+    var params = new FormData(document.getElementById('clone_form'));
+    <!--    Запрос на создание моделей скважины, секций и рейсов     -->
+    fetch('http://'+window.location.hostname+':'+window.location.port+'/main_data/api/wellbore/clone',
+   { method: 'POST', body: params }).then(response => response.json()).then(data=>{
+            params = new FormData();
+            params.set('old_wellbore', data['old_wellbore']);
+            params.set('new_wellbore', data['new_wellbore']);
+            <!--    Запрос на копию замеров     -->
+                <!--       Копия осей     -->
+            fetch('http://'+window.location.hostname+':'+window.location.port+'/axes/api/wellbore_copy',
+                     { method: 'POST', body: params });
+                <!--       Копия траектории     -->
+            fetch('http://'+window.location.hostname+':'+window.location.port+'/report/api/wellbore_copy',
+                     { method: 'POST', body: params })
+                     .then(response=>response.json()).then(
+                     location.reload());
+   })};
+
+    <!--  Удалить ствол  -->
+    function delete_wellbore(){
+        fetch('http://'+window.location.hostname+':'+window.location.port+'/main_data/api/wellbore/'+arguments[0]+'/',
+         { method: 'DELETE', headers: {'X-CSRFToken':'wFH4wGagd3i0Ki79jrFo6CyUc5SsChbovphWCqSCK5Tl8MIvS17IS0D8Z1R1Yp69'}, })
+         .then(response => response.json()).then(location.reload());
+    }
+    <!--  Создать ствол  -->
+    function create_wellbore(){
+        var params = new FormData(document.getElementById('create_form'));
+        fetch('http://'+window.location.hostname+':'+window.location.port+'/main_data/api/wellbore/',
+        { method: 'POST', body: params}).then(response => response.json()).then(location.reload());
+    }
+    <!--  Удалить комментарий  -->
+    function delete_summary(id){
+        fetch('http://'+window.location.hostname+':'+window.location.port+'/main_data/api/well/summary?'+
+        new URLSearchParams({id: id}),
+        { method: 'DELETE'}).then(response => response.json()).then(location.reload());
+
+    }
+
+    <!--  Отслеживаем смену формата отчёта  -->
+    function igirgi_drilling(wellbore_id, status){
+        console.log('Меняем формат отчёта');
+        params = new FormData();
+        params.set('wellbore_id', wellbore_id);
+        params.set('status', status);
+
+
+        fetch('http://'+window.location.hostname+':'+window.location.port+'/main_data/api/well/igirgi_drilling',
+        { method: 'POST', body: params});
+    }
+</script>
+
+{% endblock %}
+
+

@@ -1,0 +1,566 @@
+{% extends 'data_handler/index.html' %}
+{% load static %}
+{% load index %}
+
+<!-- Шапка страницы -->
+{% block header %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/0.6.6/chartjs-plugin-zoom.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@latest/dist/Chart.min.js"></script>
+{% endblock %}
+
+
+<!-- Основная информация -->
+{% block data %}
+<link type="text/css" href="{% static 'css/data_handler/chart.css' %}" rel="stylesheet">
+  <center>
+  <div class = "container-projections" >
+   <div class = "container-square" style="margin-left: 0;">
+     <canvas id="grafica1" width="100" height="100" ></canvas>
+     <form id ="formH" name="form-parameter">
+      <label class="mb-3">Запад/Восток</label>
+      <div class="mb-3">
+    <label>Мин:  <input id="minEV" type="number" step="0.0000001" name="hor_x_min" value="{{context.graph_param.hor_x_min}}"></label>
+    <label>Макс: <input id="maxEV" type="number" step="0.0000001" name="hor_x_max" value="{{context.graph_param.hor_x_max}}"></label>
+    <label>Шаг:  <input id="stepEV" type="number" step="0.0000001" name="hor_x_del" value="{{context.graph_param.hor_x_del}}"></label>
+      </div>
+    <label class="mb-3">Юг/Север</label>
+      <div class="mb-3">
+    <label>Мин:  <input id="minNS" type="number" step="0.0000001" name="hor_y_min" value="{{context.graph_param.hor_y_min}}"></label>
+    <label>Макс: <input id="maxNS" type="number" step="0.0000001" name="hor_y_max" value="{{context.graph_param.hor_y_max}}"></label>
+    <label>Шаг:  <input id="stepNS" type="number" step="0.0000001" name="hor_y_del" value="{{context.graph_param.hor_y_del}}"></label>
+      </div>
+      <div class="containeк_btn_proj" >
+    <button type="submit" id="sbtnHor">Подтвердить</button>
+    <button type="submit" id="undoHor">Сброс</button>
+      </div>
+    </form>
+   </div>
+     <div class = "container-square" style="margin-left: 0;">
+     <canvas id="grafica2" width="100" height="100" ></canvas>
+     <form id ="formV" name="form-parameter">
+      <label class="mb-3">Вертикальная секция </label>
+      <div class="mb-3 ">
+    <label >Мин: <input id="minVsect" type="number" step="0.0000001" name="ver_x_min" value="{{context.graph_param.ver_x_min}}"></label>
+    <label>Макс: <input id="maxVsect" type="number" step="0.0000001" name="ver_x_max" value="{{context.graph_param.ver_x_max}}"></label>
+    <label>Шаг: <input id="stepVsect" type="number" step="0.0000001" name="ver_x_del" value="{{context.graph_param.ver_x_del}}"></label>
+       </div>
+    <label class="mb-3">Абсолютная отметка</label>
+       <div class="mb-3">
+    <label>Мин: <input id="minTVDSS" type="number" step="0.0000001" name="ver_y_min" value="{{context.graph_param.ver_y_min}}"></label>
+    <label>Макс: <input id="maxTVDSS" type="number" step="0.0000001" name="ver_y_max" value="{{context.graph_param.ver_y_max}}"></label>
+    <label>Шаг: <input id="stepTVDSS" type="number" step="0.0000001" name="ver_y_del" value="{{context.graph_param.ver_y_del}}"></label>
+      </div>
+      <div class="containeк_btn_proj" >
+          <button type="submit" id="sbtnVer">Подтвердить</button>
+          <button type="submit" id="undoVer">Сброс</button>
+      </div>
+     </form>
+     </div>
+   </div>
+
+      <button class="btn btn-primary" type="button" onclick="save_params()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-floppy-fill" viewBox="0 0 16 16">
+              <path d="M0 1.5A1.5 1.5 0 0 1 1.5 0H3v5.5A1.5 1.5 0 0 0 4.5 7h7A1.5 1.5 0 0 0 13 5.5V0h.086a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5H14v-5.5A1.5 1.5 0 0 0 12.5 9h-9A1.5 1.5 0 0 0 2 10.5V16h-.5A1.5 1.5 0 0 1 0 14.5z"></path>
+              <path d="M3 16h10v-5.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5zm9-16H4v5.5a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5zM9 1h2v4H9z"></path>
+          </svg>
+        Сохранить выбранный масштаб
+      </button>
+</center>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/0.6.6/chartjs-plugin-zoom.js"></script>
+<script type="text/javascript">
+
+//Получаем массивы для отрисовки горизонтальной проекции
+// plannedTraj, igirgiTraj, nnbTraj -плановая траетория, траектория ИгиРГИ , траектория ННБ соответственно
+
+//x -  запад/восток , y - север/юг
+const plannedTraj = {{ context.data.plan.hor | safe }};
+const igirgiTraj = {{ context.data.staticIgirgi.hor | safe }};
+const nnbTraj = {{ context.data.staticNNB.hor | safe }};
+
+// Получаем массивы для отрисовки вертикальной проекции
+// x-TVD(вертикальная секция)  y -TVDSS (абсолютная отметка)
+const plannedTrajV = {{ context.data.plan.ver | safe }};
+const igirgiTrajV = {{ context.data.staticIgirgi.ver | safe }};
+const nnbTrajV = {{ context.data.staticNNB.ver | safe }};
+
+{% if 'dynamicIgirgi' in context.data %}
+const igirgiDTrajV = {{ context.data.dynamicIgirgi.ver | safe }};
+{% endif %}
+
+{% if 'dynamicNNB' in context.data %}
+const nnbDTrajV = {{ context.data.dynamicNNB.ver | safe }};
+{% endif %}
+
+
+// Получение ссылки на элемент canvas в DOM
+const grafica1 = document.querySelector('#grafica1');
+const grafica2 = document.querySelector('#grafica2');
+
+//Получаем ссылкии на кнопки в DOM
+
+let formH = document.getElementById('formH');
+let formV = document.getElementById('formV');
+
+let undoVer = document.getElementById('undoVer');
+let undoHor = document.getElementById('undoHor');
+
+//обработка отправки формы горизонтальной проекции
+//нужно будет забрать значения для маштабирования(пользователь ввел их в форме: minEV;maxEV;stepEV;minNS;maxNS;stepNS)
+let reload = (cl) =>{
+  cl.addEventListener('click',(e) =>{
+  e.preventDefault();
+  location.reload();
+});
+}
+reload(undoVer);
+reload(undoHor);
+
+formH.addEventListener('submit',(e) => {
+  e.preventDefault();
+ //получаем значение полей ввода
+  minEV = Number((formH.querySelector('[name="minEV"]')).value),
+  maxEV = Number((formH.querySelector('[name="maxEV"]')).value),
+  stepEV = Number((formH.querySelector('[name="stepEV"]')).value),
+
+  minNS = Number((formH.querySelector('[name="minNS"]')).value),
+  maxNS = Number((formH.querySelector('[name="maxNS"]')).value),
+  stepNS = Number((formH.querySelector('[name="stepNS"]')).value),
+
+
+  // заменяем график
+  c = document.createElement('canvas');
+  c.setAttribute("id", "grafica3");
+  c.setAttribute("width", "100");
+  c.setAttribute("height", "100");
+  grafica1.replaceWith(c);
+  grafica3 = document.querySelector('#grafica3');
+
+
+  new Chart(grafica3,
+  {
+    type: 'scatter', // Тип графики
+    data: {
+      datasets: [
+        {
+          label: 'План',
+          yAxisID: 'A',
+          data: nnbTraj,
+          showLine: true,
+          fill: false,
+          borderColor: 'rgb(164, 207, 161)',
+          pointRadius: 0,
+          zIndex: -3, 
+        },
+        {
+          label: 'ИГиРГИ',
+          yAxesID: 'B',
+          data: igirgiTraj,
+          showLine: true,
+          fill: false,
+          borderColor: 'rgba(255,168,18)',
+        },
+        {
+          label: 'HHБ',
+          yAxesID: 'C',
+          data: plannedTraj,
+          showLine: true,
+          fill: false,
+          borderColor: 'rgba(0,71,171)',
+        },
+      ],
+    },
+    options: {
+      title: {
+            display: true,
+            text: 'Горизонтальная проекция',
+            position: 'top',
+            fontSize: 16,
+            padding: 20,
+        },
+      scales: {
+        yAxes: [{
+          id: 'A',
+          scaleLabel: {
+            display: true,
+            labelString: 'Юг/Север',
+          },
+          type: 'linear',
+          position: 'left',
+          ticks: {
+            max: maxNS,
+            min: minNS,
+            stepSize: stepNS,
+          },
+          },
+        ],
+        // for zooming
+        xAxes: [{
+          ticks: {
+            min:minEV,
+            max:maxEV,
+            stepSize: stepEV,
+            autoSkip: false,
+            },
+          scaleLabel: {
+            display: true,
+            labelString: 'Запад/Восток',
+          },
+        }],
+      },
+      pan: {
+        enabled: true,
+        mode: 'xy',
+      },
+      zoom: {
+        enabled: true,
+        mode: 'xy',
+      },
+    },
+  });
+})
+
+//обработка отправки формы вертикальной проекции
+//нужно будет забрать значения для маштабирования(пользователь ввел их в форме: minTVDSS;maxTVDSS;stepTVDSS;minVsect;maxVsect;stepVsect)
+
+formV.addEventListener('submit',(e) => {
+
+  e.preventDefault();
+ //получаем значение полей ввода
+  minTVDSS = Number((formV.querySelector('[name="minTVDSS"]')).value),
+  maxTVDSS = Number((formV.querySelector('[name="maxTVDSS"]')).value),
+  stepTVDSS = Number((formV.querySelector('[name="stepTVDSS"]')).value),
+
+  minVsect = Number((formV.querySelector('[name="minVsect"]')).value),
+  maxVsect = Number((formV.querySelector('[name="maxVsect"]')).value),
+  stepVsect = Number((formV.querySelector('[name="stepVsect"]')).value),
+
+
+  // заменяем график
+  c = document.createElement('canvas');
+  c.setAttribute("id", "grafica4");
+  c.setAttribute("width", "100");
+  c.setAttribute("height", "100");
+  grafica2.replaceWith(c);
+  grafica4 = document.querySelector('#grafica4');
+
+
+  new Chart(grafica4,
+  {
+    type: 'scatter', // Тип графики
+    data: {
+      datasets: [
+        {
+          label: 'План',
+          yAxisID: 'A',
+          data: plannedTrajV,
+          showLine: true,
+          fill: false,
+          borderColor: 'rgb(164, 207, 161)',
+          pointRadius: 0,
+          zIndex: -3, 
+        },
+        {
+          label: 'ИГиРГИ',
+          yAxesID: 'B',
+          data: igirgiTrajV,
+          showLine: true,
+          fill: false,
+          borderColor: 'rgba(255,168,18)',
+        },
+        {
+          label: 'ННБ',
+          yAxesID: 'B',
+          data: nnbTrajV,
+          showLine: true,
+          fill: false,
+          borderColor: 'rgba(0,71,171)',
+        },
+        {% if 'dynamicIgirgi' in context.data %}
+        {
+          label: 'Динамика ИГиРГИ',
+          yAxesID: 'B',
+          data: igirgiDTrajV,
+          showLine: true,
+          fill: false,
+          borderColor: 'rgba(255,168,18)',
+        },
+        {% endif %}
+        {% if 'dynamicNNB' in context.data %}
+        {
+          label: 'Динамика ННБ',
+          yAxesID: 'B',
+          data: nnbDTrajV,
+          showLine: true,
+          fill: false,
+          borderColor: 'rgba(0,71,171)',
+        },
+        {% endif %}
+      ],
+    },
+    options: {
+      title: {
+            display: true,
+            text: 'Вертикальная проекция',
+            position: 'top',
+            fontSize: 14,
+            padding: 20,
+        },
+      scales: {
+        yAxes: [{
+          id: 'A',
+          scaleLabel: {
+            display: true,
+            labelString: 'Абсолютная отметка',
+          },
+          type: 'linear',
+          position: 'left',
+          ticks: {
+            max: maxTVDSS,
+            min: minTVDSS,
+            stepSize: stepTVDSS,
+          },
+          },
+        ],
+        // for zooming
+        xAxes: [{
+          ticks: {
+            min:minVsect,
+            max:maxVsect,
+            stepSize: stepVsect,
+            autoSkip: false,
+            },
+          scaleLabel: {
+            display: true,
+            labelString: 'Вертикальная секция',
+          },
+        }],
+      },
+      pan: {
+        enabled: true,
+        mode: 'xy',
+      },
+      zoom: {
+        enabled: true,
+        mode: 'y',
+      },
+    },
+  });
+})
+
+new Chart(grafica1,
+  {
+    type: 'scatter', // Тип графики
+    data: {
+      datasets: [
+        {
+          label: 'План',
+          yAxisID: 'A',
+          data: plannedTraj,
+          showLine: true,
+          fill: false,
+          borderColor: 'rgb(164, 207, 161)',
+          pointRadius: 0,
+          zIndex: -3, 
+        },
+        {
+          label: 'ИГиРГИ',
+          yAxesID: 'A',
+          data: igirgiTraj,
+          showLine: true,
+          fill: false,
+          borderColor: 'rgba(255,168,18)',
+        },
+        {
+          label: 'HHБ',
+          yAxesID: 'A',
+          data: nnbTraj,
+          showLine: true,
+          fill: false,
+          borderColor: 'rgba(0,71,171)',
+        },
+      ],
+    },
+    options: {
+      title: {
+            display: true,
+            text: 'Горизонтальная проекция',
+            position: 'top',
+            fontSize: 16,
+            padding: 20,
+        },
+      scales: {
+        yAxes: [{
+          id: 'A',
+          scaleLabel: {
+            display: true,
+            labelString: 'Юг/Север',
+          },
+          type: 'linear',
+          position: 'left',
+          },
+        ],
+        // for zooming
+        xAxes: [{
+          scaleLabel: {
+            display: true,
+            labelString: 'Запад/Восток',
+          },
+        }],
+      },
+      pan: {
+        enabled: true,
+        mode: 'xy',
+      },
+      zoom: {
+        enabled: true,
+        mode: 'xy',
+      },
+    },
+  });
+
+  new Chart(grafica2,
+  {
+    type: 'scatter', // Тип графики
+    data: {
+      datasets: [
+        {
+          label: 'План',
+          yAxisID: 'A',
+          data: plannedTrajV,
+          showLine: true,
+          fill: false,
+          borderColor: 'rgb(164, 207, 161)',
+          pointRadius: 0,
+          zIndex: -3, 
+        },
+        {
+          label: 'ИГиРГИ',
+          yAxesID: 'B',
+          data: igirgiTrajV,
+          showLine: true,
+          fill: false,
+          borderColor: 'rgba(255,168,18)',
+        },
+        {
+          label: 'ННБ',
+          yAxesID: 'B',
+          data: nnbTrajV,
+          showLine: true,
+          fill: false,
+          borderColor: 'rgba(0,71,171)',
+        },
+        {% if 'dynamicIgirgi' in context.data %}
+        {
+          label: 'Динамика ИГиРГИ',
+          yAxesID: 'B',
+          data: igirgiDTrajV,
+          showLine: true,
+          fill: false,
+          borderColor: 'rgba(255,168,18)',
+        },
+        {% endif %}
+        {% if 'dynamicNNB' in context.data %}
+        {
+          label: 'Динамика ННБ',
+          yAxesID: 'B',
+          data: nnbDTrajV,
+          showLine: true,
+          fill: false,
+          borderColor: 'rgba(0,71,171)',
+        },
+        {% endif %}
+      ],
+    },
+    options: {
+      title: {
+            display: true,
+            text: 'Вертикальная проекция',
+            position: 'top',
+            fontSize: 14,
+            padding: 20,
+        },
+      scales: {
+        yAxes: [{
+          id: 'A',
+          scaleLabel: {
+            display: true,
+            labelString: 'Абсолютная отметка',
+          },
+          type: 'linear',
+          position: 'left',
+          },
+        ],
+        // for zooming
+        xAxes: [{
+          scaleLabel: {
+            display: true,
+            labelString: 'Вертикальная секция',
+          },
+        }],
+      },
+      pan: {
+        enabled: true,
+        mode: 'xy',
+      },
+      zoom: {
+        enabled: true,
+        mode: 'y',
+      },
+    },
+  });
+
+
+<!-- Загрузка страницы [ОШИБКИ CSRF?]-->
+window.addEventListener('DOMContentLoaded', () => {
+
+<!--console.log(document.cookie);-->
+
+<!--Обновляем куки-->
+document.cookie="csrftoken={{ csrf_token }}"
+<!--console.log(document.cookie);-->
+{% if context.graph_param.hor_x_min is not None %}
+document.getElementById('sbtnHor').click();
+{% endif %}
+
+{% if context.graph_param.ver_x_min is not None%}
+document.getElementById('sbtnVer').click();
+{% endif %}
+});
+
+
+
+<!--  Сохраняем параметры графика  -->
+function save_params(){
+    let params = new FormData(document.getElementById('formH'));
+    params.append("ver_x_min", document.getElementById('minVsect').value)
+    params.append("ver_x_max", document.getElementById('maxVsect').value)
+    params.append("ver_x_del", document.getElementById('stepVsect').value)
+    params.append("ver_y_min", document.getElementById('minTVDSS').value)
+    params.append("ver_y_max", document.getElementById('maxTVDSS').value)
+    params.append("ver_y_del", document.getElementById('stepTVDSS').value)
+
+
+    fetch('http://'+window.location.hostname+':'+window.location.port+'/report/api/projection_param/'+sessionStorage.getItem('wellbore_id'),
+         { method: 'POST', body: params })
+         .then(response=>response.json()).
+          then(data=>{
+          if('warning' in data){
+            show_alert_warning(data.warning);
+          }else{
+            show_alert_success('Данные сохранены!');}
+          console.log(data);
+          });
+
+}
+
+</script>
+{% endblock %}
+
+
+<!-- НИЖНИИ КНОПКИ -->
+{% block bottom_button%}
+{% endblock%}
+

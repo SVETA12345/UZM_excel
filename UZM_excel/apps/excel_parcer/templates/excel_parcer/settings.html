@@ -1,0 +1,205 @@
+{% extends 'excel_parcer/index.html' %}
+{% load static %}
+
+{% block menu %}
+<div class="m-auto" style="text-align:center;">
+    <div class="btn-group" role="group">
+        <button onclick="location.href = {% url 'axes' %}" type="button" class="btn btn-outline-primary">
+            Вернуться к данным</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block data %}
+<style>
+   [data-tooltip] {
+    position: relative; /* Относительное позиционирование */
+   }
+   [data-tooltip]::after {
+    content: attr(data-tooltip); /* Выводим текст */
+    position: absolute; /* Абсолютное позиционирование */
+    width: 30em; /* Ширина подсказки */
+    left: 1em; top: 0; /* Положение подсказки */
+    background: #3989c9; /* Синий цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 0.5em; /* Поля вокруг текста */
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); /* Параметры тени */
+    pointer-events: none; /* Подсказка */
+    opacity: 0; /* Подсказка невидима */
+    transition: 1s; /* Время появления подсказки */
+   }
+   [data-tooltip]:hover::after {
+    opacity: 1; /* Показываем подсказку */
+    /*bottom: 0em;  Положение подсказки */
+   }
+ </style>
+
+<div class="row">
+
+    <div class="col">
+        <h4>Настройки импорта файла с осями</h4>
+        <form action="" method="POST">
+            <input name="run_id" value="" id="run_id" hidden>
+        <center>
+        <hr style="color:#FFC501;margin-top:1%;border-width: 3px">
+        <div class="col-6">
+            <h6 style="margin-top:2%">Имя(буква) столбца
+                <a data-tooltip="" hidden>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-question-circle" viewBox="0 0 16 16">
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                    <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"/>
+                </svg></a>
+            </h6>
+            <div class="input-group mb-3">
+                <span class="input-group-text">Глубина</span>
+                <input type="text" class="form-control" name="inp_depth" id="inp_depth">
+                <span class="input-group-text">Gx</span>
+                <input type="text" class="form-control" name="inp_gx" id="inp_gx">
+                <span class="input-group-text">Gy</span>
+                <input type="text" class="form-control" name="inp_gy" id="inp_gy">
+                <span class="input-group-text">Gz</span>
+                <input type="text" class="form-control" name="inp_gz" id="inp_gz">
+                <span class="input-group-text">Bx</span>
+                <input type="text" class="form-control" name="inp_bx" id="inp_bx">
+                <span class="input-group-text">By</span>
+                <input type="text" class="form-control" name="inp_by" id="inp_by">
+                <span class="input-group-text">Bz</span>
+                <input type="text" class="form-control" name="inp_bz" id="inp_bz">
+            </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text">Строка единиц измерений</span>
+                <input type="text" class="form-control"  name="inp_measurement" id="inp_unit">
+                <span class="input-group-text" >Импорт со строки</span>
+                <input type="text" class="form-control" name="inp_import" id="inp_string">
+            </div>
+        </div>
+        <hr style="color:#FFC501;margin-top:1%;border-width: 3px">
+        <div class="col-6">
+            <div style="max-width:500px">
+                <h6>Выбор телесистемы</h6>
+                <p></p>
+                <div class="input-group mb-3">
+                    <select type="text" name="device" class="form-select" id="device">
+                        {% for element in context.telesystem %}
+                        {% if element == context.last_form.device %}
+                        <option value="{{element}}" selected>{{element}}</option>
+                        {% else %}
+                        <option value="{{element}}">{{element}}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <h6 style="margin-top:2%">Коэффициенты пересчёта
+                <a href="{% url 'add_device'%}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                        <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                        <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
+                    </svg>
+                </a>
+            </h6>
+            <div class="input-group mb-3">
+                <span class="input-group-text">Gx</span>
+                <input type="text" class="form-control" name="manually_gx" id="coef_gx" readonly>
+                <span class="input-group-text">Gy</span>
+                <input type="text" class="form-control" name="manually_gy" id="coef_gy" readonly>
+                <span class="input-group-text">Gz</span>
+                <input type="text" class="form-control" name="manually_gz" id="coef_gz" readonly>
+                <span class="input-group-text">Bx</span>
+                <input type="text" class="form-control" name="manually_bx" id="coef_bx" readonly>
+                <span class="input-group-text">By</span>
+                <input type="text" class="form-control" name="manually_by" id="coef_by" readonly>
+                <span class="input-group-text">Bz</span>
+                <input type="text" class="form-control" name="manually_bz" id="coef_bz" readonly>
+            </div>
+        </div>
+        <hr style="color:#FFC501;margin-top:1%;border-width: 3px">
+
+        <button class="btn btn-primary"> Сохранить </button>
+        </center>
+        </form>
+    </div>
+
+<!--    <div class="col-6">-->
+<!--        <h4>Последние созданные настройки</h4>-->
+<!--        <hr style="color:#FFC501;margin-top:1%;border-width: 3px">-->
+<!--        <div class="card" style="width: 18rem;">-->
+<!--            <div class="card-body">-->
+<!--                <h5 class="card-title">Card title</h5>-->
+<!--                <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>-->
+<!--                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>-->
+<!--                <a href="#" class="card-link">Card link</a>-->
+<!--                <a href="#" class="card-link">Another link</a>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--    </div>-->
+</div>
+
+
+<script>
+
+<!--  Смотрим на изменение телесистемы  -->
+document.getElementById("device").addEventListener("change",function(e){
+    var params = new FormData();
+    params.set('device_title', document.getElementById("device").value);
+    <!--    Заполнение коэффициентов пересчёта    -->
+    fetch('http://'+window.location.hostname+':'+window.location.port+'/axes/api/coef_device', {
+    method: 'POST',
+    body: params }).then(response=>response.json())
+    .then(data=>{console.log(data);
+                document.getElementById("coef_gx").value = data.GX;
+                document.getElementById("coef_gy").value = data.GY;
+                document.getElementById("coef_gz").value = data.GZ;
+                document.getElementById("coef_bx").value = data.BX;
+                document.getElementById("coef_by").value = data.BY;
+                document.getElementById("coef_bz").value = data.BZ;
+                })});
+
+
+<!-- Загрузили страницу -->
+window.addEventListener('DOMContentLoaded', () => {
+    <!-- При загрузке открываем выбранную ранее скважину -->
+    let run_id = sessionStorage.getItem("run_id");
+    document.getElementById('run_id').value=run_id;
+    if (run_id != null) {
+        var params = new FormData();
+        params.set('run_id', run_id);
+
+        <!--    Заполнение индексов в полях    -->
+        fetch('http://'+window.location.hostname+':'+window.location.port+'/axes/run_index', {
+        method: 'POST',
+        body: params }).then(response=>response.json())
+        .then(data=>{
+                    var device = data.device;
+                    document.getElementById("device").value= device;
+                    document.getElementById("inp_depth").value = data.depth;
+                    document.getElementById("inp_gx").value = data.GX;
+                    document.getElementById("inp_gy").value = data.GY;
+                    document.getElementById("inp_gz").value = data.GZ;
+                    document.getElementById("inp_bx").value = data.BX;
+                    document.getElementById("inp_by").value = data.BY;
+                    document.getElementById("inp_bz").value = data.BZ;
+                    document.getElementById("inp_unit").value = data.unit;
+                    document.getElementById("inp_string").value = data.string;
+
+                    var params = new FormData();
+                    params.set('device_title', device);
+                    <!--    Заполнение коэффициентов пересчёта    -->
+                    fetch('http://'+window.location.hostname+':'+window.location.port+'/axes/api/coef_device', {
+                    method: 'POST',
+                    body: params }).then(response=>response.json())
+                    .then(data=>{
+                                document.getElementById("coef_gx").value = data.GX;
+                                document.getElementById("coef_gy").value = data.GY;
+                                document.getElementById("coef_gz").value = data.GZ;
+                                document.getElementById("coef_bx").value = data.BX;
+                                document.getElementById("coef_by").value = data.BY;
+                                document.getElementById("coef_bz").value = data.BZ;
+                                });
+                    })
+    }
+});
+
+</script>
+
+{% endblock %}

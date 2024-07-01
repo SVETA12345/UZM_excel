@@ -1,0 +1,278 @@
+{% extends 'data_handler/trajectories.html' %}
+{% load static%}
+{% load floattags %}
+
+{%  block header %}
+    <link type="text/css" href="{% static 'css/data_handler/scroll.css' %}" rel="stylesheet" />
+<style>
+.table>:not(caption)>*>* {
+	padding:0em;
+}
+td {
+    width:3rem;
+    height:2.5rem;
+}
+
+th  {
+    width:3rem;
+    height:2.5rem;
+}
+
+.noselect {
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+</style>
+{% endblock %}
+
+    {% block top_title%}
+    <div class="col-7">
+        <div class="row">
+            <div class="col-8"><b>Выбрано:</b></div>
+        </div>
+
+        <div class="row">
+            <div class="col-8">{{context.selected_obj}}</div>
+        </div>
+    </div>
+    {% endblock %}
+
+
+    {% block top_btn%}
+    <div class="col-5" style="text-align: right;">
+        <br>
+        <button type="button" onclick="delete_meas()" class="btn btn-danger"> Удалить
+        </button><span class="position-related translate-middle badge rounded-pill bg-primary" id="delete_count"></span>
+        <a href="{% url 'traj'%}?run_id={{context.selected_obj.id}}" style="text-decoration: none;color: #000;">
+        <button type="button" class="btn btn-secondary">Назад </button></a>
+    </div>
+    {% endblock %}
+
+
+    {% block tag_form %}
+<form action=""  method="post" id="form_edit" >
+    {% endblock %}
+
+    <!--  ТАБЛИЦЫ С ДАННЫМИ  -->
+    {% block NnbTableHead%}
+    <div class="col-6 noselect">
+        <table class="table table-light table-sm table-bordered table-hover" style="">
+            <thead class="thead-dark">
+            <tr>
+                <th scope="col" colspan="4">{% if context.selected_obj.section.wellbore.igirgi_drilling %} Данные плана
+                            {% else %}Данные ННБ{% endif %}</th>
+            </tr>
+            <tr >
+                <th>
+                    <input type="checkbox" style="width:50%;height:50%" id="checkall_NNB">
+                </th>
+                <th scope="col" style="width:32%">Глубина</th>
+                <th scope="col" style="width:32%">Угол</th>
+                <th scope="col" style="width:32%">Азимут</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+    {% endblock %}
+
+    {% block IgirgiTableHead %}
+     <div class="col-6 noselect">
+         <table class="table table-light table-sm table-bordered table-hover" style="">
+             <thead class="thead-dark">
+             <tr>
+                 <th scope="col" colspan="4">Данные ИГиРГИ</th>
+             </tr>
+             <tr>
+                 <th>
+                     <input type="checkbox" style="width:50%;height:50%" id="checkall_IGIRGI">
+                 </th>
+                 <th scope="col" style="width:32%">Глубина</th>
+                 <th scope="col" style="width:32%">Угол</th>
+                 <th scope="col" style="width:32%">Азимут</th>
+             </tr>
+             </thead>
+         </table>
+     </div>
+    {% endblock %}
+    {% block WasteTableHead %}
+    {% endblock %}
+    <!--  тело таблицы  -->
+    {% block NnbTableBody%}
+    <div class="col-6 noselect">
+        <table name="table-data" class="table table-light table-sm table-bordered table-hover">
+            <tbody>
+            {% for meas in context.nnb_data%}
+            <tr>
+                <td>
+                    <input type="checkbox" style="width:50%;height:50%" onmouseover="if(isMouseDown){this.click();}"
+                           class="meas_nnb" name="nnb{{meas.id}}" value="{{meas.id}}">
+                </td>
+                <td style="width:32%"><input id="dn{{meas.id}}" type="number" value="{{ meas.depth|formatted_float  }}"  onchange="getName({{meas.id}},'nnb')" step="0.0000001" style="text-align: center;Border: none; outline: none;width:100%;height:100%;"></td>
+                <td style="width:32%"><input id="cn{{meas.id}}" type="number" value="{{ meas.corner|formatted_float  }}" onchange="getName({{meas.id}},'nnb')" step="0.0000001" style="text-align: center;Border: none; outline: none;width:100%;height:100%;"></td>
+                <td style="width:32%"><input id="an{{meas.id}}" type="number" value="{{ meas.azimut|formatted_float  }}" onchange="getName({{meas.id}},'nnb')" step="0.0000001" style="text-align: center;Border: none; outline: none;width:100%;height:100%;"></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endblock %}
+    {% block IgirgiTableBody %}
+    <div class="col-6 noselect">
+        <table name="table-data" class="table table-light table-sm table-bordered table-hover">
+            <tbody>
+            {% for meas in context.igirgi_data%}
+            <tr>
+                <td>
+                    <input type="checkbox"  style="width:50%;height:50%" onmouseover="if(isMouseDown){this.click();}"
+                           {% if context.selected_obj.section.wellbore.igirgi_drilling %}{% else %} {% endif %}
+                           class="meas_igirgi" name="igirgi{{meas.id}}" value="{{meas.id}}">
+                </td>
+                <td style="width:32%"><input id="di{{meas.id}}" type="number" value="{{meas.depth |formatted_float  }}"  onchange="getName({{meas.id}},'igi')" step="0.0000001" style="text-align: center;padding:0em; Border: none; outline: none;width:100%;height:100%;"></td>
+                <td style="width:32%"><input id="ci{{meas.id}}" type="number" value="{{meas.corner|formatted_float  }}"  onchange="getName({{meas.id}},'igi')"  step="0.0000001" style="text-align: center;padding:0em; Border: none; outline: none;width:100%;height:100%;"></td>
+                <td style="width:32%"><input id="ai{{meas.id}}" type="number" value="{{meas.azimut|formatted_float  }}"  onchange="getName({{meas.id}},'igi')"  step="0.0000001" style="text-align: center;padding:0em; Border: none; outline: none;width:100%;height:100%;"></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endblock %}
+
+
+    <!--  Нижние кнопки  -->
+    {% block bottom_btn%}
+    <div class="row" style="margin-top:0.5em;">
+        <div class="col-12" style="text-align: right">
+           <button type="submit" onclick="checkbox_false();"  style="width:100%; " data-whatever="ИГиРГИ"  class="btn btn-primary">
+                <b> Сохранить <span class="badge bg-secondary" id="save_count"></span> </b>
+            </button>
+        </div>
+    </div>
+</form>
+
+
+<script>
+    <!--  Убрать все чек боксы из формы, чтобы не ломалась отправка  -->
+    function checkbox_false(){
+        document.querySelectorAll('[type="checkbox"]').forEach((element)=>{
+        element.checked = false; });
+    }
+
+    <!-- Даёт имена элементам формы для отправки только измененных значений -->
+    function getName(name, type) {
+      console.log(arguments[0], arguments[1]);
+      if (arguments[1] == 'nnb'){
+        var x_id = "dn" + arguments[0];
+        var y_id = "cn" + arguments[0];
+        var z_id = "an" + arguments[0];
+        var key = "nnb"
+      }else{
+        var x_id = "di" + arguments[0];
+        var y_id = "ci" + arguments[0];
+        var z_id = "ai" + arguments[0];
+        var key = "igirgi"
+        };
+
+      let x = document.getElementById(x_id);
+      let y = document.getElementById(y_id);
+      let z = document.getElementById(z_id);
+
+      x.style.color ='DarkOrange';
+      y.style.color ='DarkOrange';
+      z.style.color ='DarkOrange';
+
+      x.name = arguments[0]+' '+key
+      y.name = arguments[0]+' '+key
+      z.name = arguments[0]+' '+key
+
+      x.className = 'save';
+      document.getElementById('save_count').innerHTML = document.getElementsByClassName('save').length;
+    }
+
+
+
+    <!-- Чекбоксы для удаления замеров ННБ-->
+    var checkboxes_NNB=document.querySelectorAll('input.meas_nnb'),
+    checkall_NNB = document.getElementById('checkall_NNB');
+
+    // если отметить все checkbox, то будет отмечен и главный,
+    //если снять checked хотя бы с одного checkbox группы, то будет снят checked и с общего чекбокса,
+    for (var i = 0; i < checkboxes_NNB.length; i++) {
+      checkboxes_NNB[i].onclick = function () {
+      var checkedCount_NNB = document.querySelectorAll('input.meas_nnb:checked').length;
+      document.getElementById('delete_count').innerHTML = checkedCount_NNB +
+       document.querySelectorAll('input.meas_igirgi:checked').length;
+      checkall_NNB.checked = checkedCount_NNB > 0;
+      checkall_NNB.indeterminate = checkedCount_NNB > 0 && checkedCount_NNB < checkboxes_NNB.length;
+      }
+    }
+    //если будет поставлена/убрана галочка с основного чекбокса, то автоматом будут
+    //убраны/установлены все флажки второстепенных checkbox.
+    checkall_NNB.onclick = function () {
+    for (var i = 0; i < checkboxes_NNB.length; i++) {
+      checkboxes_NNB[i].checked = this.checked;
+      document.getElementById('delete_count').innerHTML = document.querySelectorAll('input.meas_igirgi:checked').length
+       + document.querySelectorAll('input.meas_nnb:checked').length;
+      }
+    }
+
+
+    <!-- Чекбоксы для удаления замеров ИГиРГИ-->
+    var checkboxes_IGIRGI=document.querySelectorAll('input.meas_igirgi'),
+    checkall_IGIRGI = document.getElementById('checkall_IGIRGI');
+
+    // если отметить все checkbox, то будет отмечен и главный,
+    //если снять checked хотя бы с одного checkbox группы, то будет снят checked и с общего чекбокса,
+    for (var i = 0; i < checkboxes_IGIRGI.length; i++) {
+      checkboxes_IGIRGI[i].onclick = function () {
+      var checkedCount_IGIRGI = document.querySelectorAll('input.meas_igirgi:checked').length;
+      document.getElementById('delete_count').innerHTML = checkedCount_IGIRGI + document.querySelectorAll('input.meas_nnb:checked').length;
+      checkall_IGIRGI.checked = checkedCount_IGIRGI > 0;
+      checkall_IGIRGI.indeterminate = checkedCount_IGIRGI > 0 && checkedCount_IGIRGI < checkboxes_IGIRGI.length;
+      }
+    }
+    //если будет поставлена/убрана галочка с основного чекбокса, то автоматом будут
+    //убраны/установлены все флажки второстепенных checkbox.
+    checkall_IGIRGI.onclick = function () {
+    for (var i = 0; i < checkboxes_IGIRGI.length; i++) {
+      checkboxes_IGIRGI[i].checked = this.checked;
+      document.getElementById('delete_count').innerHTML = document.querySelectorAll('input.meas_igirgi:checked').length
+       + document.querySelectorAll('input.meas_nnb:checked').length;
+      }
+    }
+
+
+    <!-- Удаляем выбранные замеры-->
+    function delete_meas(){
+        var params = new FormData(document.getElementById('form_edit'));
+        {% if context.selected_obj.section.wellbore.igirgi_drilling %}
+        params.set('type', 'plan');
+        {% else %}
+        params.set('type', 'nnb');
+        {% endif %}
+        fetch('http://'+window.location.hostname+':'+window.location.port+'/report/api/meas_del',
+         { method: 'POST', body: params })
+         .then(response=>response.json()).
+          then(data=>{
+          location.reload();
+          console.log('Удалили');
+          });
+
+    }
+
+    <!-- Для определения зажата ли кнопка ЛКМ-->
+    var isMouseDown = false;
+    document.body.onmousedown = function() {
+      isMouseDown = true;
+    }
+    document.body.onmouseup = function() {
+      isMouseDown = false;
+    }
+
+
+</script>
+{% endblock %}
