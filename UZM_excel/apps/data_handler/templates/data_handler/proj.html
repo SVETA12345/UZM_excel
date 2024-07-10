@@ -57,15 +57,14 @@
       </div>
      </form>
      </div>
-   </div>
-
-      <button class="btn btn-primary" type="button" onclick="save_params()">
+      <button class="btn btn-primary" style="height: 70px;" type="button" onclick="save_params()">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-floppy-fill" viewBox="0 0 16 16">
               <path d="M0 1.5A1.5 1.5 0 0 1 1.5 0H3v5.5A1.5 1.5 0 0 0 4.5 7h7A1.5 1.5 0 0 0 13 5.5V0h.086a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5H14v-5.5A1.5 1.5 0 0 0 12.5 9h-9A1.5 1.5 0 0 0 2 10.5V16h-.5A1.5 1.5 0 0 1 0 14.5z"></path>
               <path d="M3 16h10v-5.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5zm9-16H4v5.5a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5zM9 1h2v4H9z"></path>
           </svg>
         Сохранить выбранный масштаб
       </button>
+   </div>
 </center>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
@@ -121,13 +120,13 @@ reload(undoHor);
 formH.addEventListener('submit',(e) => {
   e.preventDefault();
  //получаем значение полей ввода
-  minEV = Number((formH.querySelector('[name="minEV"]')).value),
-  maxEV = Number((formH.querySelector('[name="maxEV"]')).value),
-  stepEV = Number((formH.querySelector('[name="stepEV"]')).value),
+  minEV = Number((document.getElementById("minEV")).value),
+  maxEV = Number((document.getElementById("maxEV")).value),
+  stepEV = Number((document.getElementById("stepEV")).value),
 
-  minNS = Number((formH.querySelector('[name="minNS"]')).value),
-  maxNS = Number((formH.querySelector('[name="maxNS"]')).value),
-  stepNS = Number((formH.querySelector('[name="stepNS"]')).value),
+  minNS = Number((document.getElementById("minNS")).value),
+  maxNS = Number((document.getElementById("maxNS")).value),
+  stepNS = Number((document.getElementById("stepNS")).value),
 
 
   // заменяем график
@@ -229,13 +228,13 @@ formV.addEventListener('submit',(e) => {
 
   e.preventDefault();
  //получаем значение полей ввода
-  minTVDSS = Number((formV.querySelector('[name="minTVDSS"]')).value),
-  maxTVDSS = Number((formV.querySelector('[name="maxTVDSS"]')).value),
-  stepTVDSS = Number((formV.querySelector('[name="stepTVDSS"]')).value),
+  minTVDSS = Number((document.getElementById("minTVDSS")).value),
+  maxTVDSS = Number((document.getElementById("maxTVDSS")).value),
+  stepTVDSS = Number((document.getElementById("stepTVDSS")).value),
 
-  minVsect = Number((formV.querySelector('[name="minVsect"]')).value),
-  maxVsect = Number((formV.querySelector('[name="maxVsect"]')).value),
-  stepVsect = Number((formV.querySelector('[name="stepVsect"]')).value),
+  minVsect = Number((document.getElementById("minVsect")).value),
+  maxVsect = Number((document.getElementById("maxVsect")).value),
+  stepVsect = Number((document.getElementById("stepVsect")).value),
 
 
   // заменяем график

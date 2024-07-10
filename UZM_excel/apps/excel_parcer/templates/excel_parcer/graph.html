@@ -2,12 +2,14 @@
 {% load static %}
 
 {% block header %}
+
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/0.6.6/chartjs-plugin-zoom.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@latest/dist/Chart.min.js"></script>
 {% endblock %}
-
 {% block menu %}
+<link type="text/css" href="{% static 'css/popup.css' %}" rel="stylesheet" />
 <div class="m-auto" style="text-align:center;">
   <form action="" id="well-select" method="post">
     {% csrf_token %}
@@ -25,6 +27,13 @@
 <link type="text/css" href="{% static 'css/data_handler/chart.css' %}" rel="stylesheet">
 <center>
   <div class="container">
+    <div class="b-popup" id="popup">
+      <div class="b-popup-content">
+           <h3 id="popup-tile"></h3>
+        <button id="popup_close" class="b-popup-content_close"></button>
+      </div>
+      <p id="popup_message" class="b-popup_message"></p>
+    </div>
     <h2>{{context.selected}}</h2>
     <br>
     <div class="row">
@@ -43,11 +52,11 @@
   </div>
   <br>
   <div class="container">
-    <div class="container-form" >
+    <div class="container-form"  id="form_container">
       <canvas id="grafica1" width="50" height="15"></canvas>
       <form id="form">
         <label>Глубина, м </label>
-        <div class="mb-3">
+        <div class="mb-3" name="form_depth">
           <label>Минимальное значение: <input name="depthMin" type="number" step="0.0000001"></label>
           <label>Максимальное значение: <input name="depthMax" type="number" step="0.0000001"></label>
           <label>Шаг: <input name="depthStep" type="number" step="10"></label>
@@ -74,7 +83,7 @@
       <canvas id="grafica2" width="50" height="15"></canvas>
       <form id = "formGtotal">
         <label>Глубина, м </label>
-        <div class="mb-3">
+        <div class="mb-3" name="form_depth">
           <label>Минимальное значение: <input name="depthMin" type="number" step="0.0000001"></label>
           <label>Максимальное значение: <input name="depthMax" type="number" step="0.0000001"></label>
           <label>Шаг: <input name="depthStep" type="number" step="0.0000001"></label>
@@ -95,7 +104,7 @@
       <canvas id="grafica3" width="50" height="15"></canvas>
       <form id = "formB">
         <label>Глубина, м </label>
-        <div class="mb-3">
+        <div class="mb-3" name="form_depth">
           <label>Минимальное значение: <input name="depthMin" type="number" step="0.0000001"></label>
           <label>Максимальное значение: <input name="depthMax" type="number" step="0.0000001"></label>
           <label>Шаг: <input name="depthStep" type="number" step="0.0000001"></label>
@@ -122,7 +131,7 @@
       <canvas id="grafica4" width="50" height="15"></canvas>
       <form id = "formBt">
         <label>Глубина, м </label>
-        <div class="mb-3">
+        <div class="mb-3" name="form_depth">
           <label>Минимальное значение: <input name="depthMin" type="number" step="0.0000001"></label>
           <label>Максимальное значение: <input name="depthMax" type="number" step="0.0000001"></label>
           <label>Шаг: <input name="depthStep" type="number" step="0.0000001"></label>
@@ -143,7 +152,7 @@
       <canvas id="grafica5" width="50" height="15"></canvas>
       <form id ="formHSTF">
         <label>Глубина, м </label>
-        <div class="mb-3">
+        <div class="mb-3" name="form_depth">
           <label>Минимальное значение: <input name="depthMin" type="number" step="0.0000001"></label>
           <label>Максимальное значение: <input name="depthMax" type="number" step="0.0000001"></label>
           <label>Шаг: <input name="depthStep" type="number" step="0.0000001"></label>
@@ -158,7 +167,7 @@
       <canvas id="grafica6" width="50" height="15"></canvas>
       <form id ="formDip">
         <label>Глубина, м </label>
-        <div class="mb-3">
+        <div class="mb-3" name="form_depth">
           <label>Минимальное значение: <input name="depthMin" type="number" step="0.0000001"></label>
           <label>Максимальное значение: <input name="depthMax" type="number" step="0.0000001"></label>
           <label>Шаг: <input name="depthStep" type="number" step="0.0000001"></label>
@@ -203,7 +212,25 @@ let undBtnB = document.getElementById('undoB');
 let undBtnBt = document.getElementById('undoBt');
 let undBtnHSTF = document.getElementById('undoHSTF');
 let undBtnDip = document.getElementById('undoDip');
-
+let closePopupButton = document.getElementById('popup_close');
+let popup = document.getElementById('popup');
+let popupTitle = document.getElementById('popup-tile');
+let popupMessage = document.getElementById('popup_message');
+closePopupButton.addEventListener('click',(e) =>{
+  popup.style.display='none';
+})
+// закрытие всплывающего окна по нажатии кнопки Escape
+document.addEventListener('keydown', (e)=>{
+  if (e.key =='Escape'){
+    popup.style.display='none';
+  }
+})
+document.querySelector('body').addEventListener('mouseup', (e)=>{
+  const elementClick = e.composedPath().includes(popup)
+  if (!elementClick ){
+    popup.style.display='none';
+  }
+})
 //Получаем массивы для отрисовки данных
 
 // Goxy-Gz
@@ -272,7 +299,35 @@ for (let i = 0; i < array.length; i+=1) {
 } 
 return coords;
 };
-
+//обработка изменений значений глубины(изменения вносяться во все графики)
+document.querySelectorAll('[name="form_depth"]').forEach((elem)=>{elem.addEventListener('keyup', function(event) {
+  const inputValue= event.target.value
+  if (event.target.name=="depthMin"){
+    form.querySelector('[name="depthMin"]').value=inputValue
+    formGtotal.querySelector('[name="depthMin"]').value=inputValue
+    formB.querySelector('[name="depthMin"]').value=inputValue
+    formBt.querySelector('[name="depthMin"]').value=inputValue
+    formHSTF.querySelector('[name="depthMin"]').value=inputValue
+    formDip.querySelector('[name="depthMin"]').value=inputValue
+  }
+  else if (event.target.name=="depthMax"){
+    form.querySelector('[name="depthMax"]').value=inputValue
+    formGtotal.querySelector('[name="depthMax"]').value=inputValue
+    formB.querySelector('[name="depthMax"]').value=inputValue
+    formBt.querySelector('[name="depthMax"]').value=inputValue
+    formHSTF.querySelector('[name="depthMax"]').value=inputValue
+    formDip.querySelector('[name="depthMax"]').value=inputValue
+  }
+  else if (event.target.name=="depthStep"){
+    form.querySelector('[name="depthStep"]').value=inputValue
+    formGtotal.querySelector('[name="depthStep"]').value=inputValue
+    formB.querySelector('[name="depthStep"]').value=inputValue
+    formBt.querySelector('[name="depthStep"]').value=inputValue
+    formHSTF.querySelector('[name="depthStep"]').value=inputValue
+    formDip.querySelector('[name="depthStep"]').value=inputValue
+  }
+})
+});
 //Обработка кнопки Submit и получаем значение полей ввода для графика осевых акселерометров
 form.addEventListener('submit',(e) => {
   minGoxy = Number((form.querySelector('[name="minGoxy"]')).value),
@@ -1620,6 +1675,10 @@ new Chart(grafica6,
                           form.querySelector('[name="depthMin"]').value = data['Graf1']['x_min'];
                           form.querySelector('[name="depthMax"]').value = data['Graf1']['x_max'];
                           form.querySelector('[name="depthStep"]').value = data['Graf1']['x_del'];
+
+                          form.querySelector('[name="minGz"]').value = data['Graf1']['y_minGz'];
+                          form.querySelector('[name="maxGz"]').value = data['Graf1']['y_maxGz'];
+                          form.querySelector('[name="stepGz"]').value = data['Graf1']['y_delGz'];
                           document.getElementById('sbtn').click();
                       };
                       if(Object.keys(data['Graf2']).length){
@@ -1638,6 +1697,9 @@ new Chart(grafica6,
                           formB.querySelector('[name="depthMin"]').value = data['Graf3']['x_min'];
                           formB.querySelector('[name="depthMax"]').value = data['Graf3']['x_max'];
                           formB.querySelector('[name="depthStep"]').value = data['Graf3']['x_del'];
+                          formB.querySelector('[name="minBz"]').value = data['Graf3']['y_minBz'];
+                          formB.querySelector('[name="maxBz"]').value = data['Graf3']['y_maxBz'];
+                          formB.querySelector('[name="stepBz"]').value = data['Graf3']['y_delBz'];
                           document.getElementById('sbtnB').click();
                       };
                       if(Object.keys(data['Graf4']).length){
@@ -1649,6 +1711,12 @@ new Chart(grafica6,
                           formBt.querySelector('[name="depthStep"]').value = data['Graf4']['x_del'];
                           document.getElementById('sbtnBt').click();
                       };
+                      if(Object.keys(data['Graf5']).length){
+                          formHSTF.querySelector('[name="depthMin"]').value = data['Graf5']['x_min'];
+                          formHSTF.querySelector('[name="depthMax"]').value = data['Graf5']['x_max'];
+                          formHSTF.querySelector('[name="depthStep"]').value = data['Graf5']['x_del'];
+                          document.getElementById('sbtnBt').click();
+                      };
                       if(Object.keys(data['Graf6']).length){
                           formDip.querySelector('[name="minDip"]').value = data['Graf6']['y_min'];
                           formDip.querySelector('[name="maxDip"]').value = data['Graf6']['y_max'];
@@ -1658,7 +1726,7 @@ new Chart(grafica6,
                           formDip.querySelector('[name="depthStep"]').value = data['Graf6']['x_del'];
                           document.getElementById('sbtnDip').click();
                       };
-                      console.log('resp=', data);}
+                      }
                       );
         {% endif %}
       }
@@ -1689,15 +1757,39 @@ new Chart(grafica6,
     for(var pair of formDip.entries()){
             data.append(pair[0], pair[1]);
         }
-
+    let isEmptyValue = false;
+    for (var value of data.values()) {
+        if (!value) isEmptyValue=true;
+    }
     {% if context.selected != 'None' %}
     const url = 'http://'+window.location.hostname+':'+window.location.port+'{% url 'quality_param' context.selected.id %}';
+    if (!isEmptyValue){
     fetch(url,
      { method: 'POST', body: data, credentials: 'same-origin',})
-     .then(response=>response.json())
-     .then(data=>{
-         console.log('resp=', data);
+     .then((response)=>{
+     popup.style.display='block';
+      if (response.ok){
+        response.json();
+        popupTitle.innerText = "Сохранение";
+        popupTitle.style.color='#0e9e26';
+        popupMessage.innerText = "Сохранение прошло успешно!"
+       }
+       else {
+        popupTitle.innerText = "Ошибка";
+        popupMessage.innerText = `Произошла ошибка! Статус ошибки: ${response.status}`
+        popupTitle.style.color='red';
+       }
+      })
+     .catch(data=>{
+         console.log('error=', data);
          });
+     }
+     else{
+        popup.style.display='block';
+        popupTitle.innerText = "Предупреждение";
+        popupMessage.innerText = `Данные не были сохранены! Заполните все поля!`
+        popupTitle.style.color='red';
+     }
     {% endif %}
 
   };

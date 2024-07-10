@@ -1,1 +1,1 @@
-cmd /c python manage.py runserver 10.23.125.230:9696
+cmd /c python manage.py runserver 10.23.125.145:9680

@@ -29,9 +29,45 @@ class GraphParam(models.Model):
 
     class Meta:
         abstract = True
+class Graph1DataParam(models.Model):
+    """ Абстрактный класс для параметров масштаба графиков контроля качества """
+    x_min = models.FloatField('Минимальное значение по X')
+    x_max = models.FloatField('Максимальное значение по X')
+    x_del = models.FloatField('Шаг по X', null=True)
+    y_min = models.FloatField('Минимальное значение по Y')
+    y_max = models.FloatField('Максимальное значение по Y')
+    y_del = models.FloatField('Шаг по Y', null=True)
+    y_minGz = models.FloatField('Минимальное значение по Y')
+    y_maxGz = models.FloatField('Максимальное значение по Y')
+    y_delGz = models.FloatField('Шаг по Y', null=True)
+    wellbore = models.OneToOneField(Wellbore, on_delete=models.CASCADE)
 
+    def get_title(self):
+        return 'График контроля качества'
 
-class Graf1Param(GraphParam):
+    class Meta:
+        abstract = True
+
+class Graph3DataParam(models.Model):
+    """ Абстрактный класс для параметров масштаба графиков контроля качества """
+    x_min = models.FloatField('Минимальное значение по X')
+    x_max = models.FloatField('Максимальное значение по X')
+    x_del = models.FloatField('Шаг по X', null=True)
+    y_min = models.FloatField('Минимальное значение по Y')
+    y_max = models.FloatField('Максимальное значение по Y')
+    y_del = models.FloatField('Шаг по Y', null=True)
+    y_minBz = models.FloatField('Минимальное значение по Y')
+    y_maxBz = models.FloatField('Максимальное значение по Y')
+    y_delBz = models.FloatField('Шаг по Y', null=True)
+    wellbore = models.OneToOneField(Wellbore, on_delete=models.CASCADE)
+
+    def get_title(self):
+        return 'График контроля качества'
+
+    class Meta:
+        abstract = True
+
+class Graf1Param(Graph1DataParam):
     class Meta:
         db_table = 'report_graph1'
 
@@ -41,7 +77,7 @@ class Graf2Param(GraphParam):
         db_table = 'report_graph2'
 
 
-class Graf3Param(GraphParam):
+class Graf3Param(Graph3DataParam):
     class Meta:
         db_table = 'report_graph3'
 
@@ -226,3 +262,4 @@ class InterpPlan(Meas):
 def get_run_by_id(run_id):
     """Нужно будет убрать"""
     return Run.objects.get(id=run_id)
+

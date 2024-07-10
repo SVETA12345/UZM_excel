@@ -182,9 +182,9 @@ def graph_param_saver(model, my_wellbore, data: dict) -> str:
 
     try:
         model.objects.create(**data)
-    except ValueError:
-        return 'ValueError'
 
+    except ValueError:
+        return ValueError
     return 'ok'
 
 
@@ -192,8 +192,8 @@ def graph_param_giver(model, my_wellbore) -> dict:
     """Получение параметров масштаба для графиков"""
     try:
         my_param = model.objects.get(wellbore=my_wellbore)
-    except model.DoesNotExist:
-        return {}
+    except ValueError:
+        return ValueError
 
     return {'x_min': my_param.x_min,
             'x_max': my_param.x_max,
@@ -202,6 +202,33 @@ def graph_param_giver(model, my_wellbore) -> dict:
             'y_max': my_param.y_max,
             'y_del': my_param.y_del}
 
+def graph_param_nine_giver(model, my_wellbore) -> dict:
+    """Получение параметров масштаба для графиков c 9 параметрами"""
+    try:
+        my_param = model.objects.get(wellbore=my_wellbore)
+    except ValueError:
+        return ValueError
+    if 'graf1param' == my_param._meta.model_name:
+        return {'x_min': my_param.x_min,
+                'x_max': my_param.x_max,
+                'x_del': my_param.x_del,
+                'y_min': my_param.y_min,
+                'y_max': my_param.y_max,
+                'y_del': my_param.y_del,
+                'y_minGz': my_param.y_minGz,
+                'y_maxGz': my_param.y_max,
+                'y_delGz': my_param.y_del,
+                }
+    return {'x_min': my_param.x_min,
+            'x_max': my_param.x_max,
+            'x_del': my_param.x_del,
+            'y_min': my_param.y_min,
+            'y_max': my_param.y_max,
+            'y_del': my_param.y_del,
+            'y_minBz': my_param.y_minBz,
+            'y_maxBz': my_param.y_maxBz,
+            'y_delBz': my_param.y_delBz,
+            }
 
 def quality_param(request, wellbore_id):
     """ Параметры для графиков контроля качества """
@@ -210,57 +237,69 @@ def quality_param(request, wellbore_id):
         w = Wellbore.objects.get(id=wellbore_id)
     except Wellbore.DoesNotExist:
         return JsonResponse({'status': f'Error: Wellbore with ID-{wellbore_id} DoesNotExist.'})
-
     if request.method == 'POST':
-        graph_param_saver(Graf1Param, w, {'x_min': dict(request.POST)['depthMin'][0],
+        graph_param_saver(Graf1Param, wellbore_id, {'x_min': dict(request.POST)['depthMin'][0],
                                           'x_max': dict(request.POST)['depthMax'][0],
                                           'x_del': dict(request.POST)['depthStep'][0],
                                           'y_min': request.POST['minGoxy'],
                                           'y_max': request.POST['maxGoxy'],
                                           'y_del': request.POST['stepGoxy'],
-                                          'wellbore': w})
+                                          'y_minGz': request.POST['minGz'],
+                                          'y_maxGz': request.POST['maxGz'],
+                                          'y_delGz': request.POST['stepGz'],
+                                          'wellbore_id': wellbore_id})
 
-        graph_param_saver(Graf2Param, w, {'x_min': dict(request.POST)['depthMin'][1],
+        graph_param_saver(Graf2Param, wellbore_id, {'x_min': dict(request.POST)['depthMin'][1],
                                           'x_max': dict(request.POST)['depthMax'][1],
                                           'x_del': dict(request.POST)['depthStep'][1],
                                           'y_min': request.POST['minGtotal'],
                                           'y_max': request.POST['maxGtotal'],
                                           'y_del': request.POST['stepGtotal'],
-                                          'wellbore': w})
+                                          'wellbore_id': wellbore_id})
 
-        graph_param_saver(Graf3Param, w, {'x_min': dict(request.POST)['depthMin'][2],
+        graph_param_saver(Graf3Param, wellbore_id, {'x_min': dict(request.POST)['depthMin'][2],
                                           'x_max': dict(request.POST)['depthMax'][2],
                                           'x_del': dict(request.POST)['depthStep'][2],
                                           'y_min': request.POST['minBoxy'],
                                           'y_max': request.POST['maxBoxy'],
                                           'y_del': request.POST['stepBoxy'],
-                                          'wellbore': w})
+                                          'y_minBz': request.POST['minBz'],
+                                          'y_maxBz': request.POST['maxBz'],
+                                          'y_delBz': request.POST['stepBz'],
+                                          'wellbore_id': wellbore_id})
 
-        graph_param_saver(Graf4Param, w, {'x_min': dict(request.POST)['depthMin'][3],
+        graph_param_saver(Graf4Param, wellbore_id, {'x_min': dict(request.POST)['depthMin'][3],
                                           'x_max': dict(request.POST)['depthMax'][3],
                                           'x_del': dict(request.POST)['depthStep'][3],
                                           'y_min': request.POST['minBtot'],
                                           'y_max': request.POST['maxBtot'],
                                           'y_del': request.POST['stepBtot'],
-                                          'wellbore': w})
-
-        graph_param_saver(Graf6Param, w, {'x_min': dict(request.POST)['depthMin'][5],
+                                          'wellbore_id': wellbore_id})
+        graph_param_saver(Graf5Param, wellbore_id, {'x_min': dict(request.POST)['depthMin'][5],
+                                                    'x_max': dict(request.POST)['depthMax'][5],
+                                                    'x_del': dict(request.POST)['depthStep'][5],
+                                                    'y_min': request.POST['minDip'],
+                                                    'y_max': request.POST['maxDip'],
+                                                    'y_del': request.POST['stepDip'],
+                                                    'wellbore_id': wellbore_id})
+        graph_param_saver(Graf6Param, wellbore_id, {'x_min': dict(request.POST)['depthMin'][5],
                                           'x_max': dict(request.POST)['depthMax'][5],
                                           'x_del': dict(request.POST)['depthStep'][5],
                                           'y_min': request.POST['minDip'],
                                           'y_max': request.POST['maxDip'],
                                           'y_del': request.POST['stepDip'],
-                                          'wellbore': w})
+                                          'wellbore_id': wellbore_id})
 
         return JsonResponse({'status': 'ок'})
 
     if request.method == 'GET':
         response_data = dict()
-        response_data['Graf1'] = graph_param_giver(Graf1Param, w)
-        response_data['Graf2'] = graph_param_giver(Graf2Param, w)
-        response_data['Graf3'] = graph_param_giver(Graf3Param, w)
-        response_data['Graf4'] = graph_param_giver(Graf4Param, w)
-        response_data['Graf6'] = graph_param_giver(Graf6Param, w)
+        response_data['Graf1'] = graph_param_nine_giver(Graf1Param, wellbore_id)
+        response_data['Graf2'] = graph_param_giver(Graf2Param, wellbore_id)
+        response_data['Graf3'] = graph_param_nine_giver(Graf3Param, wellbore_id)
+        response_data['Graf4'] = graph_param_giver(Graf4Param, wellbore_id)
+        response_data['Graf5'] = graph_param_giver(Graf5Param, wellbore_id)
+        response_data['Graf6'] = graph_param_giver(Graf6Param, wellbore_id)
         return JsonResponse(response_data)
 
 
