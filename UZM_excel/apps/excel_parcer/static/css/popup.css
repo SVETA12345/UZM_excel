@@ -1,7 +1,6 @@
 .b-popup{
     display:none;
     width:20%;
-    height: 120px;
     background-color: #EEE8AA;
     border-radius:5px;
     position:fixed;

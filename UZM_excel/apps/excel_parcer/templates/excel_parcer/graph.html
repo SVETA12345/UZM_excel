@@ -1726,7 +1726,7 @@ new Chart(grafica6,
                           formDip.querySelector('[name="depthStep"]').value = data['Graf6']['x_del'];
                           document.getElementById('sbtnDip').click();
                       };
-                      }
+  }
                       );
         {% endif %}
       }
@@ -1741,26 +1741,40 @@ new Chart(grafica6,
     let formBt = new FormData(document.getElementById('formBt'));
     let formHSTF = new FormData(document.getElementById('formHSTF'));
     let formDip = new FormData(document.getElementById('formDip'));
-
+    let isEmptyValue = false;
+    let messageWarning = '';
     for(var pair of formGtotal.entries()){
             data.append(pair[0], pair[1]);
+            console.log(pair[0], pair[1])
+            if (!pair[1] && !messageWarning.includes('напряжённости гравитационного поля')){
+              isEmptyValue = true;
+              messageWarning =messageWarning+ '<p>напряжённости гравитационного поля;</p>';
+            }
         }
     for(var pair of formB.entries()){
             data.append(pair[0], pair[1]);
+            if (!pair[1] && !messageWarning.includes('соотношений показаний осевых и поперечных магнитометров')){
+              isEmptyValue = true;
+              messageWarning= messageWarning+'<p>соотношений показаний осевых и поперечных магнитометров;</p>'
+            }
         }
     for(var pair of formBt.entries()){
             data.append(pair[0], pair[1]);
+            if (!pair[1] && !messageWarning.includes('напряженности геомагнитного поля')){
+              isEmptyValue = true;
+              messageWarning = messageWarning+'<p>напряженности геомагнитного поля;</p>';
+            }
         }
     for(var pair of formHSTF.entries()){
             data.append(pair[0], pair[1]);
         }
     for(var pair of formDip.entries()){
             data.append(pair[0], pair[1]);
+            if (!pair[1] && !messageWarning.includes('магнитного наклонения')){
+              isEmptyValue = true;
+              messageWarning = messageWarning+'<p>магнитного наклонения;</p>';
+            }
         }
-    let isEmptyValue = false;
-    for (var value of data.values()) {
-        if (!value) isEmptyValue=true;
-    }
     {% if context.selected != 'None' %}
     const url = 'http://'+window.location.hostname+':'+window.location.port+'{% url 'quality_param' context.selected.id %}';
     if (!isEmptyValue){
@@ -1768,6 +1782,7 @@ new Chart(grafica6,
      { method: 'POST', body: data, credentials: 'same-origin',})
      .then((response)=>{
      popup.style.display='block';
+     popup.style.height='120px';
       if (response.ok){
         response.json();
         popupTitle.innerText = "Сохранение";
@@ -1781,13 +1796,14 @@ new Chart(grafica6,
        }
       })
      .catch(data=>{
-         console.log('error=', data);
+         console.log('resp=', data);
          });
      }
      else{
+        popup.style.height='285px';
         popup.style.display='block';
         popupTitle.innerText = "Предупреждение";
-        popupMessage.innerText = `Данные не были сохранены! Заполните все поля!`
+        popupMessage.innerHTML = `Данные не были сохранены! Заполните все поля в графике(ах): ${messageWarning}`
         popupTitle.style.color='red';
      }
     {% endif %}

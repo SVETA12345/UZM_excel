@@ -16,11 +16,11 @@ class Meas(models.Model):
 
 class GraphParam(models.Model):
     """ Абстрактный класс для параметров масштаба графиков контроля качества """
-    x_min = models.FloatField('Минимальное значение по X')
-    x_max = models.FloatField('Максимальное значение по X')
+    x_min = models.FloatField('Минимальное значение по X', null=True)
+    x_max = models.FloatField('Максимальное значение по X', null=True)
     x_del = models.FloatField('Шаг по X', null=True)
-    y_min = models.FloatField('Минимальное значение по Y')
-    y_max = models.FloatField('Максимальное значение по Y')
+    y_min = models.FloatField('Минимальное значение по Y', null=True)
+    y_max = models.FloatField('Максимальное значение по Y', null=True)
     y_del = models.FloatField('Шаг по Y', null=True)
     wellbore = models.OneToOneField(Wellbore, on_delete=models.CASCADE)
 
@@ -31,14 +31,14 @@ class GraphParam(models.Model):
         abstract = True
 class Graph1DataParam(models.Model):
     """ Абстрактный класс для параметров масштаба графиков контроля качества """
-    x_min = models.FloatField('Минимальное значение по X')
-    x_max = models.FloatField('Максимальное значение по X')
+    x_min = models.FloatField('Минимальное значение по X', null=True)
+    x_max = models.FloatField('Максимальное значение по X', null=True)
     x_del = models.FloatField('Шаг по X', null=True)
-    y_min = models.FloatField('Минимальное значение по Y')
-    y_max = models.FloatField('Максимальное значение по Y')
+    y_min = models.FloatField('Минимальное значение по Y', null=True)
+    y_max = models.FloatField('Максимальное значение по Y', null=True)
     y_del = models.FloatField('Шаг по Y', null=True)
-    y_minGz = models.FloatField('Минимальное значение по Y')
-    y_maxGz = models.FloatField('Максимальное значение по Y')
+    y_minGz = models.FloatField('Минимальное значение по Y', null=True)
+    y_maxGz = models.FloatField('Максимальное значение по Y', null=True)
     y_delGz = models.FloatField('Шаг по Y', null=True)
     wellbore = models.OneToOneField(Wellbore, on_delete=models.CASCADE)
 
@@ -50,14 +50,14 @@ class Graph1DataParam(models.Model):
 
 class Graph3DataParam(models.Model):
     """ Абстрактный класс для параметров масштаба графиков контроля качества """
-    x_min = models.FloatField('Минимальное значение по X')
-    x_max = models.FloatField('Максимальное значение по X')
+    x_min = models.FloatField('Минимальное значение по X', null=True)
+    x_max = models.FloatField('Максимальное значение по X', null=True)
     x_del = models.FloatField('Шаг по X', null=True)
-    y_min = models.FloatField('Минимальное значение по Y')
-    y_max = models.FloatField('Максимальное значение по Y')
+    y_min = models.FloatField('Минимальное значение по Y', null=True)
+    y_max = models.FloatField('Максимальное значение по Y', null=True)
     y_del = models.FloatField('Шаг по Y', null=True)
-    y_minBz = models.FloatField('Минимальное значение по Y')
-    y_maxBz = models.FloatField('Максимальное значение по Y')
+    y_minBz = models.FloatField('Минимальное значение по Y', null=True)
+    y_maxBz = models.FloatField('Максимальное значение по Y', null=True)
     y_delBz = models.FloatField('Шаг по Y', null=True)
     wellbore = models.OneToOneField(Wellbore, on_delete=models.CASCADE)
 
