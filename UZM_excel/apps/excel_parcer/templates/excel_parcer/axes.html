@@ -4,7 +4,7 @@
 {%  block header %}
 <!--для fileupload-->
  <meta name="viewport" content="width=device-width, initial-scale=1">
- <link type="text/css" href="{% static 'css/DragAndDropFile.css' %}" rel="stylesheet" />
+ <link type="text/css" href='../../static/css/DragAndDropFile.css' rel="stylesheet" />
 {% endblock %}
 
 
@@ -32,12 +32,16 @@
 {% endblock %}
 
 {% block data %}
+<div class="title__container">
 <h3>{{context.selected_run}} | Активная фаза:
     {% if context.selected_run.section.wellbore.well_name.status_drilling == 'ACTV'%}
     <img src="{% static 'image/orange.png' %}" alt="Не в активной фазе" style="width: 25px; height: 25px;">
     {% else %}
     <img src="{% static 'image/grey.png' %}" alt="Не в активной фазе" style="width: 25px; height: 25px;">
     {% endif %}</h3>
+<button class="btn-reset" title="Откатить">
+</button>
+</div>
 <center>
 
     <div class="container" style="max-width:None;">

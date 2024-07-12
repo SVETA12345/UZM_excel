@@ -30,3 +30,26 @@
   padding:7px 20px
   }
 
+.title__container{
+    width:98%;
+    display: flex;
+    justify-content: space-between;
+}
+.btn-reset{
+    margin-bottom: 10px;
+    background-image: url(../image/reset.svg);
+    background-color: yellow;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    height: 40px;
+    width: 40px;
+    border: none;
+}
+
+.btn-reset:hover{
+  opacity: 0.7;
+}
+.btn-reset__tooltip {
+  display: none;
+}

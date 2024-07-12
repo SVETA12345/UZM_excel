@@ -94,7 +94,7 @@ class Data(models.Model):
         return dip
 
     def Zenit(self):
-        return round(math.degrees(math.acos(self.CZ / sqrt(self.CX ** 2 + self.CY ** 2 + self.CZ ** 2))), 2)
+        return round(math.degrees(math.acos(self.CZ / (sqrt(self.CX ** 2 + self.CY ** 2 + self.CZ ** 2) or 1))), 2)
 
     def Azimut(self):
         azim = round(math.degrees(math.atan2(
