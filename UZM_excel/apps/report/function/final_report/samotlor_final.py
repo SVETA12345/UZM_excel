@@ -298,7 +298,7 @@ def SamotlorProj(prs, run_obj):
 def SamotlorRecomendation(prs, my_wellbore):
     """ Слайд с выводами и рекомендациями"""
     waste = get_waste(my_wellbore)
-    slide = prs.slides[6]
+    slide = prs.slides[7]
     slide.shapes[0].text_frame.paragraphs[2].text = (slide.shapes[0].text_frame.paragraphs[2].text
                                                      .replace('{{meas_dot}}', str(waste[0]['Точка замера']))
                                                      .replace('{{hor_waste}}', str(waste[0]['Отход по горизонтали']))

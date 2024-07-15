@@ -51,7 +51,10 @@ def standard_final(my_run, my_well, my_wellbore) -> str:
 
 def samotlor_final(my_run, my_well, my_wellbore) -> str:
     """ Конструктор отчётов для Самотлора """
-    prs = Presentation(os.getcwd() + "\\files\\Шаблон\\Самотлорское_итоговый.pptx")
+    if my_well.get_well_type() == 'ВНС':
+        prs = Presentation(os.getcwd() + "\\files\\Шаблон\\Самотлорское_итоговый_ВНС.pptx")
+    else:
+        prs = Presentation(os.getcwd() + "\\files\\Шаблон\\Самотлорское_итоговый.pptx")
     # !!! Титульный слайд !!!
     SamotlorTitle(prs, my_well)
     # !!! Общая информация !!!
@@ -277,8 +280,8 @@ def QualityChartsMaker(prs, run_obj):
     fig, ax = plt.subplots(1, 1, figsize=(11.1, 2.8))
     currFig = id(fig)
     plt.subplots_adjust(**margins)
-    plt.plot(context['depth'], context['depthGoxy'], color='blue', label='Boxy')
-    plt.plot(context['depth'], context['depthGz'], color='red', label='Bz')
+    plt.plot(context['depth'], context['depthBoxy'], color='blue', label='Boxy')
+    plt.plot(context['depth'], context['depthBz'], color='red', label='Bz')
     plt.title('График соотношения показаний осевого и поперечного магнитометров', fontsize=12)
     plt.xlabel('Измеренная глубина, м', color='gray', fontsize=10)
     plt.ylabel('Boxy, нТл', color='gray', fontsize=10)
@@ -369,3 +372,4 @@ def RecomendationMaker(prs, my_wellbore):
     slide.shapes[5].text_frame.paragraphs[3].font.name = 'Segoe UI'
     slide.shapes[5].text_frame.paragraphs[4].font.size = Pt(13.5)
     slide.shapes[5].text_frame.paragraphs[4].font.name = 'Segoe UI'
+

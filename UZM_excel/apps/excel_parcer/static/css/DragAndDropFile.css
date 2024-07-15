@@ -53,3 +53,14 @@
 .btn-reset__tooltip {
   display: none;
 }
+.scroll-body {  /*Скрол по аналогии с таблице для div*/
+	max-height: 55vh;
+	width: 100%;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+.thead-dark{
+    position: sticky;
+    top: -3px;
+    background: white;
+}
