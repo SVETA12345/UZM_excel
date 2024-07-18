@@ -1,0 +1,10 @@
+select * from report_graph3;
+alter table report_graph3 add y_minBz real;
+alter table report_graph3 add y_maxBz real;
+alter table report_graph3 add y_delBz real;
+select * from report_graph3;
+select * from report_graph3;
+alter table report_graph1 add y_minGz real;
+alter table report_graph1 add y_maxGz real;
+alter table report_graph1 add y_delGz real;
+select * from report_graph1;
