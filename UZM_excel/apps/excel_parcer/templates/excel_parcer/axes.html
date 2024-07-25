@@ -40,8 +40,6 @@
     {% else %}
     <img src="{% static 'image/grey.png' %}" alt="Не в активной фазе" style="width: 25px; height: 25px;">
     {% endif %}</h3>
-    {{date_max}}
-    {% if date_max != 0 %} false; {% else %} true; {% endif %}
 <button id="btn-reset" class="btn-reset" onclick="openPopupReset()" title="Откатить"></button>
 </div>
 <center>
@@ -362,6 +360,7 @@ let popupTitle = document.getElementById('popup-tile');
 let popup = document.getElementById('popup');
 let popupMessage = document.getElementById('popup_message');
 let popupSubmit = document.getElementById('popup_submit');
+// кнопка Откатить при отсутствии актуальной даты становиться неактивной
 if ('{{date_max|safe}}' == '0'){
     openResetModalBut.setAttribute("disabled", "true");
 }
@@ -384,7 +383,7 @@ document.querySelector('body').addEventListener('mouseup', (e)=>{
             popup.style.display='none';
        }
      })
-
+    <!-- Функция, выполняющая откат -->
      function handleSubmitReset(element){
         var params = new FormData();
         params.set('run_id', sessionStorage.getItem("run_id"))

@@ -39,7 +39,7 @@ def index(request):
         for row in context['data']:
             if row.date:
                 dif_date = datetime.now(timezone.utc)-row.date
-                if dif_date.total_seconds()<=900 and (date_max == 0 or date_max<row.date):
+                if dif_date.total_seconds()<=3600 and (date_max == 0 or date_max<row.date):
                     date_max=row.date
 
         if 'depth' in request.POST:  # Модальная форма с скорректированными значениями
