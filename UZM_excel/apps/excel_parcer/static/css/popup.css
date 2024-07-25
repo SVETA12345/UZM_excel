@@ -1,5 +1,6 @@
 .b-popup{
     display:none;
+    z-index: 1;
     width:20%;
     background-color: #EEE8AA;
     border-radius:5px;
@@ -42,6 +43,20 @@
     border: none;
 }
 
-.b-popup-content_close:hover{
+.b-popup-content_close:hover, .b-popup_buttton:hover{
   opacity: 0.7;
   }
+ .b-popup_buttton{
+    width: 40px;
+    height:40px;
+    margin-right: 80px;
+    border:1px solid #92b0b3;
+    background: #AFEEEE;
+    color: #191970;
+    font-weight: 600;
+ }
+
+ .b-popup__container-button{
+    width:95%;
+    display:flex;
+ }

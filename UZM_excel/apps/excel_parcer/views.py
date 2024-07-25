@@ -9,6 +9,7 @@ import re
 from Field.views_api import get_tree
 from Field.models import Well, Run, Wellbore, Run, get_all_run, Section, get_all_well
 from .models import Data, AxesFileIndex, Device
+from datetime import timedelta, datetime, timezone
 
 
 def index(request):
@@ -21,7 +22,8 @@ def index(request):
                'error_depth': list(),  # глубины замеров при вставке которых нашли ошибку
                "telesystem": Device.objects.all(),
                }
-
+    # устанавливаем начальное значение макс даты
+    date_max = 0
     if request.method == 'POST':
         # получение данных для отображения
         try:
@@ -29,10 +31,17 @@ def index(request):
             context['title'] = current_run.section.wellbore.well_name.get_title()
         except Exception as e:
             print(e)
-            return render(request, 'excel_parcer/axes.html', {'context': context, })
+            return render(request, 'excel_parcer/axes.html', {'context': context, 'date_max': date_max,})
         context['well'] = current_run.section.wellbore.well_name
-        context['data'] = Data.objects.filter(run=request.POST['run'], in_statistics=1).order_by('depth')
         context['selected_run'] = current_run
+        context['data'] = Data.objects.filter(run=request.POST['run'], in_statistics=1).order_by('depth')
+        # находим записи, котрые были добавлены в поледние 15 минут, это нужно для кнопки Откатить
+        for row in context['data']:
+            if row.date:
+                dif_date = datetime.now(timezone.utc)-row.date
+                if dif_date.total_seconds()<=900 and (date_max == 0 or date_max<row.date):
+                    date_max=row.date
+
         if 'depth' in request.POST:  # Модальная форма с скорректированными значениями
             depth_data = request.POST['depth'].replace(',', '.').replace(' ', '').replace('\r', ''). \
                 replace('\n', '\t').split('\t')
@@ -49,7 +58,7 @@ def index(request):
                         obj.save()
                     except:
                         context['error_depth'].append(float(meas[0]))
-    return render(request, 'excel_parcer/axes.html', {'context': context, })
+    return render(request, 'excel_parcer/axes.html', {'context': context, 'date_max': date_max,})
 
 
 def edit_index(request):
@@ -215,7 +224,7 @@ def uploadAxesFile(request):
             except AxesFileIndex.DoesNotExist:
                 return JsonResponse({'warning': 'Ошибка чтения! Пожалуйста, проверьте настройки импорта для '
                                                 'выбранного рейса!'})
-
+            # данные которые пришли
             result = parcing_manually("./media/" + file_name,
                                       telesystem.depth,
                                       telesystem.GX,
@@ -224,15 +233,14 @@ def uploadAxesFile(request):
                                       telesystem.BX,
                                       telesystem.BY,
                                       telesystem.BZ,
-                                      telesystem.string_index, )
-            print(result)
+                                      telesystem.string_index,
+                                      )
+            # обнавлённые данные с учётом старых
             result2 = new_measurements(result, telesystem.device.device_title)
-            conflict = write_to_bd(result2, current_run)
-
+            conflict, date = write_to_bd(result2, current_run)
             if len(conflict['old']) > 0:
                 # print(f'Замена замеров, status: Открыть модальное окно!')
-                return JsonResponse({'conflict_warning': 'Изменились значения осей!', 'conflict': conflict})
-
+                return JsonResponse({'conflict_warning': 'Изменились значения осей!', 'conflict': conflict, 'date':str(date)})
     return JsonResponse({'status': 'ok'})
 
 

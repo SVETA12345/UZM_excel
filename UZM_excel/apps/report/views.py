@@ -44,9 +44,12 @@ def report(request):
     """Делаем отчёт по имеющимся данным и отправляем его имя"""
     # по рейсу ищем все остальные рейсы скважины
     run = Run.objects.get(id=request.POST['run_id'])
+    runs = Run.objects.filter(section__wellbore=run.section.wellbore).order_by('run_number')
+    plan = Plan.objects.filter(run__in=runs).last()
+
     runs = Run.objects.filter(section__wellbore=run.section.wellbore)
     all_data = get_data(runs)
-    file_name, waste = write_data_in_Excel(all_data, f'Единая_форма_отчета.xlsx', run)  # имя файла и отходы
+    file_name, waste = write_data_in_Excel(all_data, f'Единая_форма_отчета.xlsx', run, plan)  # имя файла и отходы
     return JsonResponse({'file_name': file_name, 'waste': waste})
 
 

@@ -14,7 +14,7 @@ from openpyxl.utils import get_column_letter, column_index_from_string
 
 from ..models import List, Device, Data
 from ..serializer import DataSerializer
-
+from datetime import datetime
 
 def toFixed(numObj, digits=0):
     return f"{numObj:.{digits}f}"
@@ -234,9 +234,7 @@ def new_measurements(data, name):
     Тоже бы переписать когда-нибудь. Здесь преобразуем данные по указанным правилам.
     Приводим к одному формату.
     """
-
     result = []
-
     for i in range(len(data)):
         new_data = []
         for j in range(len(data[i])):
@@ -293,6 +291,7 @@ def write_to_bd(data: list[list], run: object) -> NoReturn:
     """
     create_obj = list()
     conflict = {'old': list(), 'new': list()}
+    date=datetime.now()
     for rows in data:
         try:
             if len(rows) < 7:  # проверка на наличие всех осей
@@ -317,7 +316,10 @@ def write_to_bd(data: list[list], run: object) -> NoReturn:
                                                            CZ=rows[3],
                                                            BX=rows[4],
                                                            BY=rows[5],
-                                                           BZ=rows[6])).data)
+                                                           BZ=rows[6],
+                                                           date=date
+                                                           )).data)
+
         except Data.DoesNotExist:
             create_obj.append(Data(
                 depth=rows[0],
@@ -328,9 +330,14 @@ def write_to_bd(data: list[list], run: object) -> NoReturn:
                 BX=rows[4],
                 BY=rows[5],
                 BZ=rows[6],
+                date=date,
                 in_statistics=True, ))
+
     Data.objects.bulk_create(create_obj)
-    return conflict
+    current_date=0
+    if len(create_obj)>0:
+        current_date=date
+    return conflict, current_date
 
 
 def convert_sign(eval_str: str) -> str:

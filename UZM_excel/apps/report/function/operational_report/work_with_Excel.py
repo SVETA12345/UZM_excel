@@ -77,7 +77,7 @@ def zero_deleter(data: dict[str:list]) -> dict[str:list]:
 """
 
 
-def write_data_in_Excel(all_data: dict, filename: str, Run: object) -> tuple[
+def write_data_in_Excel(all_data: dict, filename: str, Run: object, plan) -> tuple[
     str, dict[str, float | Any]]:
     """
     Записываем замеры из all_data в шаблон, filename - имя шаблона в папке Шаблон
@@ -100,23 +100,22 @@ def write_data_in_Excel(all_data: dict, filename: str, Run: object) -> tuple[
 
     file_folder = file_dir + '\\Шаблон\\' + filename
     excel_file = openpyxl.load_workbook(file_folder)
-
     # если бурим по траектории ИГиРГИ заменяем замеры ннб на план
     nnb_data = all_data['Статические замеры ННБ'] if not wellbore.igirgi_drilling else \
         all_data['Плановая траектория интерп']
+
     hor, ver, common = write_data(excel_file,  # горизонтальные, вертикальные, общие отходы
                                   nnb_data,
                                   all_data['Статические замеры ИГИРГИ'],
                                   other_data,
                                   Run,
-                                  report_type)
-
+                                  report_type,
+                                )
     waste = {'hor': hor,
              'ver': ver,
              'common': common,
              'word': waste_word,
              }
-
     if 'Динамические замеры ИГИРГИ' in all_data:  # полный формат с доп данными
         dynamic_nnb(excel_file, all_data['Динамические замеры ННБ'])
         dynamic_igirgi(excel_file, all_data['Динамические замеры ИГИРГИ'])
@@ -132,6 +131,9 @@ def write_data_in_Excel(all_data: dict, filename: str, Run: object) -> tuple[
                                  last_depth=all_data['Статические замеры ИГИРГИ']['Глубина'][-1],
                                  departure_ver=ver,
                                  departure_horiz=hor, )
+    # Замена названия ячейки Плановая траектория если измерения видутся по ИГИРГИ
+    if wellbore.igirgi_drilling and plan:
+        excel_file['Данные'].cell(row=14, column=6).value = plan.plan_version
     excel_file.save(file_dir + '\\Report_out\\' + report_name)
     return report_name, waste
 
@@ -167,6 +169,7 @@ def write_data(excel: openpyxl.workbook.workbook.Workbook,
     Первая страница запись (Данные)
     Возвращаем последние посчитанные отходы для наименования файла
     """
+
     well_obj = Run.section.wellbore.well_name
     write_hat(excel['Данные'], well_obj)  # шапка для страницы
 
@@ -226,11 +229,11 @@ def write_data(excel: openpyxl.workbook.workbook.Workbook,
                  (meas[11] - meas[8]) ** 2), 2)
 
         excel_sheet.cell(row=row, column=13).value = meas[12]
+
         if row == (17 + len(igirgi['Глубина']) - 1):  # забираем последние значения отходов
             return round(sqrt((X_nnb - X_igirgi) ** 2 + (Y_nnb - Y_igigri) ** 2), 2), round(meas[11] - meas[8], 2), \
                 round(sqrt((X_nnb - X_igirgi) ** 2 + (Y_nnb - Y_igigri) ** 2 + (meas[11] - meas[8]) ** 2), 2)
         row += 1
-
 
 def sevcom_data(excel_sheet: openpyxl.workbook.workbook.Workbook,
                 nnb: dict, igirgi: dict, other: dict,
@@ -297,9 +300,14 @@ def samotlor_data(excel_sheet: openpyxl.workbook.workbook.Workbook,
                   nnb: dict, igirgi: dict, other: dict,
                   Well: object) -> tuple[float, float, float]:
     """Нестандартный формат отчёта с номером рейса и без абсолютной отметки"""
+
     row = 18
     count = 0  # первую строку не выводим
     # запись в ячейки
+    min1 = min(len(igirgi['Глубина']), len(igirgi['Угол']), len(igirgi['Азимут']), len(nnb['Угол']), len(nnb['Азимут']),
+                    len(other['igirgi_TVDSS']), len(other['igirgi_delta_x']), len(other['igirgi_delta_y']), len(other['igirgi_TVD']),
+                    len(other['nnb_delta_x']), len(other['nnb_delta_y']), len(other['nnb_TVD']), len(igirgi['Комментарий']),
+                    len(igirgi['Рейс']))
     for meas in zip(igirgi['Глубина'], igirgi['Угол'], igirgi['Азимут'], nnb['Угол'], nnb['Азимут'],
                     other['igirgi_TVDSS'], other['igirgi_delta_x'], other['igirgi_delta_y'], other['igirgi_TVD'],
                     other['nnb_delta_x'], other['nnb_delta_y'], other['nnb_TVD'], igirgi['Комментарий'],
@@ -343,7 +351,7 @@ def samotlor_data(excel_sheet: openpyxl.workbook.workbook.Workbook,
                  (meas[11] - meas[8]) ** 2), 2)
 
         excel_sheet.cell(row=row, column=13).value = meas[12]
-        if row == (17 + len(igirgi['Глубина']) - 1):  # забираем последние значения отходов
+        if row == (17 + min1 - 1):  # забираем последние значения отходов
             # print(round(sqrt((X_nnb - X_igirgi) ** 2 + (Y_nnb - Y_igigri) ** 2), 2), round(meas[11] - meas[8], 2),
             #       round(sqrt((X_nnb - X_igirgi) ** 2 + (Y_nnb - Y_igigri) ** 2 + (meas[11] - meas[8]) ** 2), 2))
             return round(sqrt((X_nnb - X_igirgi) ** 2 + (Y_nnb - Y_igigri) ** 2), 2), round(meas[11] - meas[8], 2), \

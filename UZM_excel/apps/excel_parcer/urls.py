@@ -31,4 +31,5 @@ urlpatterns = [
     path('api/wellbore_copy', wellbore_copy),
     path('api/addAxes', add_Axes),
     path('api/updateAxes', update_Axes),
+    path('api/reset_data', reset_data),
 ]

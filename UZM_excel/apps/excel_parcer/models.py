@@ -57,6 +57,7 @@ class Data(models.Model):
     DIP_corr = models.FloatField('DIP_corr', null=True)
     in_statistics = models.BooleanField('Учитывать в статистике', null=True)
     comment = models.TextField('Комментарий', default='', null=True, blank='True')
+    date =models.DateTimeField('Дата', null=True)
 
     def __str__(self):
         return str(self.run) + ' ' + str(self.depth)
@@ -167,3 +168,25 @@ class AxesFileIndex(models.Model):
     class Meta:
         verbose_name = 'Индесы телесистемы'
         verbose_name_plural = 'Индесы телесистемы'
+
+class Conflict(models.Model):
+    """Один из замеров под рейс"""
+    run = models.ForeignKey(Run, on_delete=models.CASCADE)
+    depth = models.FloatField('Глубина', max_length=10)
+    CX = models.FloatField('GX', max_length=10, null=True)
+    CY = models.FloatField('GY', max_length=10, null=True)
+    CZ = models.FloatField('GZ', max_length=10, null=True)
+    BX = models.FloatField('BX', max_length=10, null=True)
+    BY = models.FloatField('BY', max_length=10, null=True)
+    BZ = models.FloatField('BZ', max_length=10, null=True)
+    Btotal_corr = models.FloatField('Btotal_corr', null=True)
+    DIP_corr = models.FloatField('DIP_corr', null=True)
+    in_statistics = models.BooleanField('Учитывать в статистике', null=True)
+    comment = models.TextField('Комментарий', default='', null=True, blank='True')
+    date =models.DateTimeField('Дата', null=True)
+
+    def __str__(self):
+        return str(self.run) + ' ' + str(self.depth)
+
+    class Meta:
+        db_table = 'excel_parcer_conflict'

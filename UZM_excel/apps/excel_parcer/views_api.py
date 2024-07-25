@@ -16,7 +16,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from Field.models import Run
-
+from datetime import datetime
 
 class DeviceListView(viewsets.ViewSet):
     """ Получить все телесистемы с коэффициентами """
@@ -126,7 +126,7 @@ class DataByRunAPIView(APIView):
         except Run.DoesNotExist:
             return Response({'status': f'Рейс с id {run_id} не найден'})
         update_obj = list()
-        print(request.data)
+        print('rrrr', request.data)
         for meas in request.data:
             bd_data = Data.objects.get_or_create(depth=meas['depth'], run=current_run)
             update_obj.append(bd_data[0])
@@ -218,20 +218,21 @@ def add_Axes(request):
                 manually_bz.append(data)
             counter = (0 if counter == 6 else counter + 1)
         # result - считанные данные
-        result = zip(manually_depth, manually_gx, manually_gy, manually_gz, manually_bx, manually_by, manually_bz)
-        # print(list(result))
+        result = list(zip(manually_depth, manually_gx, manually_gy, manually_gz, manually_bx, manually_by, manually_bz))
+        result2 = new_measurements(result, request.POST.get('device'))  # перобразованные данные
+
         if request.POST.get('device') != '-----' and request.POST.get('device') != '':
             telesystem_ind = AxesFileIndex.objects.get(run_id=current_run)
             telesystem_ind.device = Device.objects.get(device_title=request.POST.get('device'))
             telesystem_ind.save()
-            result2 = new_measurements(list(result), request.POST.get('device'))  # перобразованные данные
-            conflict = write_to_bd(result2, current_run)
+            result2 = new_measurements(result, request.POST.get('device'))  # перобразованные данные
+            conflict, date = write_to_bd(result2, current_run)
         else:
-            conflict = write_to_bd(result, current_run)
+            conflict, date = write_to_bd(result, current_run)
 
         if len(conflict['old']) > 0:
             print('Открыть модальное окно!')
-            return JsonResponse({'warning': 'Изменились значения осей!', 'conflict': conflict})
+            return JsonResponse({'warning': 'Изменились значения осей!', 'conflict': conflict, 'date': str(date)})
         else:
             return JsonResponse({'status': 'ok'})
     return JsonResponse({'warning': 'Обратитесь к POST методу!'})
@@ -242,6 +243,26 @@ def update_Axes(request):
     # print(request.POST.dict())
     try:
         obj = Data.objects.get(run=request.POST['run_id'], depth=request.POST['depth'])
+
+        Conflict.objects.create(
+            depth=obj.depth,
+            run_id=obj.run.id,
+            CX=obj.CX,
+            CY=obj.CY,
+            CZ=obj.CZ,
+            BX=obj.BX,
+            BY=obj.BY,
+            BZ=obj.BZ,
+            date=obj.date,
+            Btotal_corr=obj.Btotal_corr,
+            DIP_corr=obj.DIP_corr,
+            in_statistics=obj.in_statistics,
+            comment=obj.comment
+        )
+        if request.POST['date'] == "0":
+            obj.date = datetime.now()
+        else:
+            obj.date = request.POST['date']
         obj.CX = request.POST['CX']
         obj.CY = request.POST['CY']
         obj.CZ = request.POST['CZ']
@@ -253,3 +274,32 @@ def update_Axes(request):
         return JsonResponse({"warning": "Ошибка перезаписи."})
 
     return JsonResponse({"status": f"Замер с ID:{obj.id} успешно перезаписан!"})
+
+def reset_data(request):
+
+    try:
+        data = Data.objects.filter(run=request.POST['run_id'], date=request.POST['date'])
+        for element in data:
+            try:
+                conflictElement = Conflict.objects.filter(run=request.POST['run_id'], depth=element.depth).last()
+                Data.objects.get(id=element.id).delete()
+                if conflictElement:
+                    Data.objects.create(
+                        depth=conflictElement.depth,
+                        run= conflictElement.run,
+                        CX= conflictElement.CX,
+                        CY=conflictElement.CY,
+                        CZ=conflictElement.CZ,
+                        BX=conflictElement.BX,
+                        BY=conflictElement.BY,
+                        BZ=conflictElement.BZ,
+                        date=conflictElement.date,
+                        in_statistics = conflictElement.in_statistics
+                    )
+                    Conflict.objects.get(id=conflictElement.id).delete()
+            except Conflict.DoesNotExist:
+                Data.objects.get(id=element.id).delete()
+
+        return JsonResponse({'status': 'ok'})
+    except Data.DoesNotExist:
+        return JsonResponse({"warning": "Ошибка отката."})

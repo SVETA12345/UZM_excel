@@ -5,6 +5,7 @@
 <!--для fileupload-->
  <meta name="viewport" content="width=device-width, initial-scale=1">
  <link type="text/css" href='../../static/css/DragAndDropFile.css' rel="stylesheet" />
+<link type="text/css" href="{% static 'css/popup.css' %}" rel="stylesheet" />
 {% endblock %}
 
 
@@ -39,11 +40,24 @@
     {% else %}
     <img src="{% static 'image/grey.png' %}" alt="Не в активной фазе" style="width: 25px; height: 25px;">
     {% endif %}</h3>
-<button class="btn-reset" title="Откатить"></button>
+    {{date_max}}
+    {% if date_max != 0 %} false; {% else %} true; {% endif %}
+<button id="btn-reset" class="btn-reset" onclick="openPopupReset()" title="Откатить"></button>
 </div>
 <center>
-
+    <div class="b-popup" id="popup">
+            <div class="b-popup-content">
+                <h3 id="popup-tile"></h3>
+                 <button id="popup_close" class="b-popup-content_close"></button>
+             </div>
+             <p id="popup_message" class="b-popup_message">Вы точно хотите откатить изменения?</p>
+            <div class="b-popup__container-button">
+             <button id="popup_submit" class="b-popup_buttton" type="submit" onclick="handleSubmitReset(this)">Да</button>
+             <button id="popup_close_no" class="b-popup-content_close b-popup_buttton" >Нет</button>
+            </div>
+         </div>
     <div class="container" style="max-width:None;">
+
         <div class="row">
             <div class="col-12">
                 <div class="upload-container" style="text-align:center;">
@@ -74,16 +88,16 @@
 
                     <tbody>
                     {% for obj in context.data %}
-                    <tr style="text-align: center;">
-                        <td scope="col">{{obj.depth_dot}}</td>
-                        <td scope="col">{{obj.CX_dot}}</td>
-                        <td scope="col">{{obj.CY_dot}}</td>
+                    <tr style="{% if date_max != 0 and obj.date == date_max %} background-color:#90EE90; {% endif %}">
+                        <td style="background:none;" scope="col">{{obj.depth_dot}}</td>
+                        <td style="background:none;" scope="col">{{obj.CX_dot}}</td>
+                        <td style="background:none;" scope="col">{{obj.CY_dot}}</td>
                         <td scope="col"
-                            style="{% if obj.CZ < 0 %} background-color:#facfcf; {% endif %}">{{obj.CZ_dot}}</td>
-                        <td scope="col">{{obj.BX_dot}}</td>
-                        <td scope="col">{{obj.BY_dot}}</td>
-                        <td scope="col"
-                            style="{% if obj.BZ < 0 %} background-color:#facfcf; {% endif %}">{{obj.BZ_dot}}</td>
+                            style="{% if obj.CZ < 0 %} background-color:#facfcf; {% else %} background:none; {% endif %}">{{obj.CZ_dot}}</td>
+                        <td style="background:none;" scope="col">{{obj.BX_dot}}</td>
+                        <td style="background:none;" scope="col">{{obj.BY_dot}}</td>
+                        <td  scope="col"
+                            style="{% if obj.BZ < 0 %} background-color:#facfcf; {% else %} background:none; {% endif %}">{{obj.BZ_dot}}</td>
                     </tr>
                     {% endfor %}
                     </tbody>
@@ -339,6 +353,78 @@
 </div>
 
 <script>
+
+let openResetModalBut = document.getElementById('btn-reset');
+
+let closePopupButtonAll = document.querySelectorAll('.b-popup-content_close');
+let closePopupButton = document.getElementById('popup_close_no');
+let popupTitle = document.getElementById('popup-tile');
+let popup = document.getElementById('popup');
+let popupMessage = document.getElementById('popup_message');
+let popupSubmit = document.getElementById('popup_submit');
+if ('{{date_max|safe}}' == '0'){
+    openResetModalBut.setAttribute("disabled", "true");
+}
+else{
+    openResetModalBut.removeAttribute("disabled");
+}
+closePopupButtonAll.forEach((button)=>{button.addEventListener('click',(e) =>{
+            popup.style.display='none';
+        })
+        })
+// закрытие всплывающего окна по нажатии кнопки Escape
+document.addEventListener('keydown', (e)=>{
+       if (e.key =='Escape'){
+             popup.style.display='none';
+                }
+})
+document.querySelector('body').addEventListener('mouseup', (e)=>{
+    const elementClick = e.composedPath().includes(popup)
+    if (!elementClick ){
+            popup.style.display='none';
+       }
+     })
+
+     function handleSubmitReset(element){
+        var params = new FormData();
+        params.set('run_id', sessionStorage.getItem("run_id"))
+        var date = '{{date_max|safe}}'
+        params.set('date', date)
+        fetch('http://'+window.location.hostname+':'+window.location.port+'/axes/api/reset_data',
+         { method: 'POST', body: params })
+             .then((response)=>{
+                popupSubmit.style.display='none';
+                closePopupButton.style.display='none';
+                console.log(response)
+                if (!response.ok){
+                console.log('eheir')
+                    popupTitle.innerText = "Ошибка";
+                    popupMessage.innerText = `Произошла ошибка! Статус ошибки: ${response.status}`
+                    popupTitle.style.color='red';
+                    reject("Ошибка");
+                }
+                else{
+                    popupMessage.innerText="Откат прошёл успешно!"
+                    popup.style.height='150px';
+                    popup.style.display='block';
+                    popupTitle.innerText = "Откат";
+                    popupTitle.style.color='green';
+                }
+             }).
+             then(data=>{
+                location.reload()
+             }).catch((err)=>{console.log(err)});
+     }
+    <!-- Функция открытия модального окна "Откатить" -->
+    function openPopupReset(){
+        popup.style.height='150px';
+        popup.style.display='block';
+        popupTitle.innerText = "Предупреждение";
+        popupTitle.style.color='red';
+        popupSubmit.style.display='block';
+        closePopupButton.style.display='block';
+        }
+
     <!-- Функция для сохранения комментариев к замерам -->
     function put_comm(number, comment){
         var params = new FormData();
@@ -370,6 +456,7 @@
                     }
                     <!--           Заполняем старые значения         -->
                     data.conflict.old.forEach(function(Value, index){
+
                         var new_tr = document.createElement("tr");
                         var tdDepth = document.createElement("td");
                         tdDepth.innerHTML = Value.depth
@@ -388,6 +475,10 @@
                         var tdBtn = document.createElement("td");
                         html_btn = '<input type="radio" class="btn-check" name="options'+ index +'" id="first_opt'+ index +'" autocomplete="off" onclick="addMeas(this);"><label class="btn btn-outline-success" for="first_opt'+ index +'" style="height:25px; width:60px; display: flex; align-items: center; justify-content: center;">    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/></svg></label>'
                         tdBtn.innerHTML = html_btn
+                        var tdDate = document.createElement("td");
+                        tdDate.innerHTML = data.date
+                        tdDate.style.display='none'
+
 
                         new_tr.appendChild(tdDepth)
                         new_tr.appendChild(tdBX)
@@ -397,13 +488,14 @@
                         new_tr.appendChild(tdGY)
                         new_tr.appendChild(tdGZ)
                         new_tr.appendChild(tdBtn)
-
+                        new_tr.appendChild(tdDate)
 
                         var old_body = document.getElementById("old_tbd");
                         old_body.appendChild(new_tr);
                          })
                     <!--           Заполняем новые значения         -->
                     data.conflict.new.forEach(function(Value, index){
+
                         var new_tr = document.createElement("tr");
 
                         var tdDepth = document.createElement("td");
@@ -423,6 +515,9 @@
                         var tdBtn = document.createElement("td");
                         html_btn = '<input type="radio" class="btn-check" name="options'+ index +'" id="second_opt'+ index +'" autocomplete="off" onclick="addMeas(this);"><label class="btn btn-outline-success" for="second_opt'+ index +'" style="height:25px; width:60px; display: flex; align-items: center; justify-content: center;">    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/></svg></label>'
                         tdBtn.innerHTML = html_btn
+                        var tdDate = document.createElement("td");
+                        tdDate.innerHTML = data.date
+                        tdDate.style.display='none'
 
                         new_tr.appendChild(tdBtn)
                         new_tr.appendChild(tdDepth)
@@ -432,6 +527,7 @@
                         new_tr.appendChild(tdGX)
                         new_tr.appendChild(tdGY)
                         new_tr.appendChild(tdGZ)
+                        new_tr.appendChild(tdDate)
 
                         var new_body = document.getElementById("new_tbd");
                         new_body.appendChild(new_tr);
@@ -446,6 +542,7 @@
     function addMeas(obj){
         let mList = new Array();
         for (var i = 0; i < obj.parentNode.parentNode.childNodes.length; i++) {
+            console.log('obj', obj.parentNode.parentNode.childNodes[i].firstChild.textContent)
             let element = obj.parentNode.parentNode.childNodes[i].firstChild.textContent;
             if(element != ''){
                 mList.push(element);}
@@ -461,6 +558,7 @@
         params.set('BX', mList[4])
         params.set('BY', mList[5])
         params.set('BZ', mList[6])
+        params.set('date', mList[7])
         fetch('http://'+window.location.hostname+':'+window.location.port+'/axes/api/updateAxes',
         {method: 'POST', body: params})
         .then(response=>response.json())
@@ -473,7 +571,6 @@
     var data = new FormData()
     data.append('run_id', sessionStorage.getItem("run_id"))
     data.append('file',input_obj.files[0])
-
     fetch('http://'+window.location.hostname+':'+window.location.port+'/axes/api/upload_file', {method: 'POST', body: data})
     .then(response=>response.json())
     .then(data=>{
@@ -490,6 +587,8 @@
         }
         <!--           Заполняем старые значения         -->
         data.conflict.old.forEach(function(Value, index){
+
+            console.log('Value', Value )
             var new_tr = document.createElement("tr");
             var tdDepth = document.createElement("td");
             tdDepth.innerHTML = Value.depth
@@ -508,7 +607,9 @@
             var tdBtn = document.createElement("td");
             html_btn = '<input type="radio" class="btn-check" name="options'+ index +'" id="first_opt'+ index +'" autocomplete="off" onclick="addMeas(this);"><label class="btn btn-outline-success" for="first_opt'+ index +'" style="height:25px; width:60px; display: flex; align-items: center; justify-content: center;">    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/></svg></label>'
             tdBtn.innerHTML = html_btn
-
+            var tdDate = document.createElement("td");
+            tdDate.innerHTML = data.date
+            tdDate.style.display='none'
             new_tr.appendChild(tdDepth)
             new_tr.appendChild(tdBX)
             new_tr.appendChild(tdBY)
@@ -517,15 +618,15 @@
             new_tr.appendChild(tdGY)
             new_tr.appendChild(tdGZ)
             new_tr.appendChild(tdBtn)
-
+            new_tr.appendChild(tdDate)
 
             var old_body = document.getElementById("old_tbd");
             old_body.appendChild(new_tr);
              })
         <!--           Заполняем новые значения         -->
         data.conflict.new.forEach(function(Value, index){
-            var new_tr = document.createElement("tr");
 
+            var new_tr = document.createElement("tr");
             var tdDepth = document.createElement("td");
             tdDepth.innerHTML = Value.depth
             var tdBX = document.createElement("td");
@@ -540,7 +641,12 @@
             tdGY.innerHTML = Value.BY
             var tdGZ = document.createElement("td");
             tdGZ.innerHTML = Value.BZ
+            var tdDate = document.createElement("td");
+            tdDate.innerHTML = data.date
+            tdDate.style.display='none'
             var tdBtn = document.createElement("td");
+
+
             html_btn = '<input type="radio" class="btn-check" name="options'+ index +'" id="second_opt'+ index +'" autocomplete="off" onclick="addMeas(this);"><label class="btn btn-outline-success" for="second_opt'+ index +'" style="height:25px; width:60px; display: flex; align-items: center; justify-content: center;">    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/></svg></label>'
             tdBtn.innerHTML = html_btn
 
@@ -552,6 +658,7 @@
             new_tr.appendChild(tdGX)
             new_tr.appendChild(tdGY)
             new_tr.appendChild(tdGZ)
+            new_tr.appendChild(tdDate)
 
             var new_body = document.getElementById("new_tbd");
             new_body.appendChild(new_tr);
