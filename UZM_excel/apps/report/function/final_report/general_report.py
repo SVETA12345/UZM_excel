@@ -13,7 +13,7 @@ from report.function.model_service import get_waste
 from excel_parcer.models import Data
 
 from .samotlor_final import SamotlorTitle, SamotlorInfo, SamotlorRecomendation, SamotlorQualityCharts, SamotlorProj
-from report.models import Graf2Param, Graf4Param, Graf6Param, Graf1Param
+from report.models import Graf2Param, Graf4Param, Graf6Param, Graf3Param
 import matplotlib
 matplotlib.use('agg')
 
@@ -155,7 +155,6 @@ def InfoMaker(prs, well_obj, my_wellbore):
 def QualityChartsMaker(prs, run_obj):
     """Заполняет информацией слайдов контроля качества"""
     # !!! Данные для графика !!!
-    print('yess')
     wellbore_obj = run_obj.section.wellbore
     runs = Run.objects.filter(section__wellbore=wellbore_obj)
 
