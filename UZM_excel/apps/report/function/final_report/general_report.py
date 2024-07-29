@@ -237,7 +237,7 @@ def QualityChartsMaker(prs, run_obj):
         ax.set_ylim(graph_param.y_min, graph_param.y_max)
         ax.set_yticks(np.arange(graph_param.y_min, graph_param.y_max, graph_param.y_del))
     except Graf2Param.DoesNotExist:
-        pass
+        print('Данные графика не заполнены')
     plt.grid(True)
     plt.savefig(image_stream)
     x, y = Inches(1.1), Inches(0.8)
@@ -265,7 +265,7 @@ def QualityChartsMaker(prs, run_obj):
         ax.set_ylim(graph_param.y_min, graph_param.y_max)
         ax.set_yticks(np.arange(graph_param.y_min, graph_param.y_max, graph_param.y_del))
     except Graf6Param.DoesNotExist:
-        pass
+        print('Данные графика не заполнены')
     plt.grid(True)
     plt.savefig(image_stream)
     x, y = Inches(1.1), Inches(3.6)
@@ -292,8 +292,8 @@ def QualityChartsMaker(prs, run_obj):
         ax.set_xticks(np.arange(graph_param.x_min, graph_param.x_max, graph_param.x_del))
         ax.set_ylim(graph_param.y_min, graph_param.y_max)
         ax.set_yticks(np.arange(graph_param.y_min, graph_param.y_max, graph_param.y_del))
-    except Graf1Param.DoesNotExist:
-        pass
+    except Graf3Param.DoesNotExist:
+        print('Данные графика не заполнены')
     plt.grid(True)
     plt.savefig(image_stream)
     x, y = Inches(1.1), Inches(0.8)
@@ -321,7 +321,7 @@ def QualityChartsMaker(prs, run_obj):
         ax.set_ylim(graph_param.y_min, graph_param.y_max)
         ax.set_yticks(np.arange(graph_param.y_min, graph_param.y_max, graph_param.y_del))
     except Graf4Param.DoesNotExist:
-        pass
+        print('Данные графика не заполнены')
     plt.grid(True)
     plt.savefig(image_stream)
     x, y = Inches(1.1), Inches(3.6)

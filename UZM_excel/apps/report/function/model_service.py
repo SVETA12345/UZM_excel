@@ -78,7 +78,6 @@ def get_data(runs: Union[object, Iterable[object]]) -> dict:
 
     add_anchor_point(data['Статические замеры ННБ'])
     add_anchor_point(data['Статические замеры ИГИРГИ'])
-    add_anchor_point(data['Плановая траектория'])
 
     if data.get('Плановая траектория интерп') is not None:
         add_anchor_point(data['Плановая траектория интерп'])

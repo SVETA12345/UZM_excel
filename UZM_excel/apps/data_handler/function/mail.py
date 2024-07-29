@@ -18,7 +18,7 @@ class BodyData:
 class Letter:
     """ Здесь хранятся данные для пиьсма """
 
-    def __init__(self, Wellbore: object):
+    def __init__(self, Wellbore: object, plan_version):
         """ Передаем экземпляр скважины по которой отправляем отчёт """
         self.data_body = BodyData(Wellbore)
         self.subject = 'test'  # тема письма будет заполняться в js функции при выдаче файла (нужны отходы с отчета)
@@ -28,7 +28,10 @@ class Letter:
             Wellbore.well_name.mail_Cc.replace('\r\n', ' ') if Wellbore.well_name.mail_Cc != '' else 'None')  # копия
         # тело письма
         self.warning = 'Бурение ведётся по траектории ИГиРГИ.%0D%0A' if Wellbore.igirgi_drilling else ''
-        self.text_part = 'от плановой траектории' if Wellbore.igirgi_drilling else 'от траектории подрядчика ННБ'
+        if plan_version:
+            self.text_part = 'от плановой траектории '+ plan_version if Wellbore.igirgi_drilling else 'от траектории подрядчика ННБ'
+        else:
+            self.text_part = 'от плановой траектории' if Wellbore.igirgi_drilling else 'от траектории подрядчика ННБ'
         self.body = 'Это тело письма'  # get_body() - перезаписывает все переменные ниже
         self.comm_waste = "Это строка с общими отходами"
         self.hor_waste = 'Это строка с горизонтальными отходами'

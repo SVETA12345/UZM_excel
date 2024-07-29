@@ -44,9 +44,7 @@ def traj(request):
             plan_data = Plan.objects.filter(run__in=runs)
             context["plan_ex"] = (True if len(plan_data) != 0 else False)
             context["plan_version"] = (plan_data[0].plan_version if context["plan_ex"] else '-')
-            context['letter'] = Letter(run.section.wellbore)
-            if context['letter'].text_part=='от плановой траектории' and context["plan_version"]:
-                context['letter'].text_part=context['letter'].text_part+' '+ context["plan_version"]
+            context['letter'] = Letter(run.section.wellbore, plan_data[0].plan_version)
             # Замеры
             context["igirgi_data"] = IgirgiStatic.objects.filter(run=run_id).exclude(depth=0)
             # БУРИМ ПО ПЛАНОВОЙ ТРАЕКТОРИИ
