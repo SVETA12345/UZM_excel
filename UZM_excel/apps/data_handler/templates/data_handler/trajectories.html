@@ -481,7 +481,6 @@ function Send_mail() {
     <!--  Задаём в пост запрос номер рейса  -->
     var params = new FormData();
     params.set('run_id', {{context.selected_obj.id}});
-
     fetch('http://'+window.location.hostname+':'+window.location.port+'/report/api/file_name',
     { method: 'POST', body: params })
     .then(response=>response.json()).

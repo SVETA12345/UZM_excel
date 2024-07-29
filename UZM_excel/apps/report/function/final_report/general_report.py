@@ -155,6 +155,7 @@ def InfoMaker(prs, well_obj, my_wellbore):
 def QualityChartsMaker(prs, run_obj):
     """Заполняет информацией слайдов контроля качества"""
     # !!! Данные для графика !!!
+    print('yess')
     wellbore_obj = run_obj.section.wellbore
     runs = Run.objects.filter(section__wellbore=wellbore_obj)
 
@@ -287,7 +288,7 @@ def QualityChartsMaker(prs, run_obj):
     plt.ylabel('Boxy, нТл', color='gray', fontsize=10)
     plt.legend(bbox_to_anchor=bbox, loc='upper left', fontsize=10)
     try:
-        graph_param = Graf1Param.objects.get(wellbore=wellbore_obj)
+        graph_param = Graf3Param.objects.get(wellbore=wellbore_obj)
         ax.set_xlim(graph_param.x_min, graph_param.x_max)
         ax.set_xticks(np.arange(graph_param.x_min, graph_param.x_max, graph_param.x_del))
         ax.set_ylim(graph_param.y_min, graph_param.y_max)

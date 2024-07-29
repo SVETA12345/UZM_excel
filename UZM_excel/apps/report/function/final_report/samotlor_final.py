@@ -172,6 +172,7 @@ def SamotlorQualityCharts(prs, run_obj):
     fig, ax = plt.subplots(figsize=(8.73, 2.6))
     currFig = id(fig)
     plt.subplots_adjust(**margins)
+
     plt.plot(context['depth'], context['depthGtotal'], color='#D6D64C', label='Gt')
     plt.plot(context['depth'], context['depthGref'], color='g', label='Gt_REF')
     plt.plot(context['depth'], context['depthGmax'], '--r')
@@ -239,7 +240,7 @@ def SamotlorQualityCharts(prs, run_obj):
     plt.ylabel('Boxy, нТл', color='gray', fontsize=10)
     plt.legend(bbox_to_anchor=bbox, loc='upper left', fontsize=10)
     try:
-        graph_param = Graf1Param.objects.get(wellbore=wellbore_obj)
+        graph_param = Graf3Param.objects.get(wellbore=wellbore_obj)
         ax.set_xlim(graph_param.x_min, graph_param.x_max)
         ax.set_xticks(np.arange(graph_param.x_min, graph_param.x_max, graph_param.x_del))
         ax.set_ylim(graph_param.y_min, graph_param.y_max)
