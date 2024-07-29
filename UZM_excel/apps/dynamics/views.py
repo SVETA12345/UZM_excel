@@ -75,7 +75,7 @@ def dynamics_traj(request):
                 print('Пропуск при вставке динамики', e)
         obj.objects.bulk_create(create_obj)
         obj.objects.bulk_update(update_obj, ["corner", "azimut", ])
-
+    print('CONTEXT', context)
     return render(request, 'dynamics/dynamic_trajectories.html', {'context': context, })
 
 

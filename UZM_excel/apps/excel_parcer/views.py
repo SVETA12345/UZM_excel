@@ -35,12 +35,15 @@ def index(request):
         context['well'] = current_run.section.wellbore.well_name
         context['selected_run'] = current_run
         context['data'] = Data.objects.filter(run=request.POST['run'], in_statistics=1).order_by('depth')
-        # находим записи, котрые были добавлены в поледние 15 минут, это нужно для кнопки Откатить
-        for row in context['data']:
-            if row.date:
-                dif_date = datetime.now(timezone.utc)-row.date
-                if dif_date.total_seconds()<=3600 and (date_max == 0 or date_max<row.date):
-                    date_max=row.date
+        lastElem = Data.objects.filter(run=request.POST['run'], in_statistics=1).order_by('depth').last()
+        # находим записи, котрые были добавлены в поледний час, это нужно для кнопки Откатить
+        if lastElem and lastElem.date is not None:
+            date_max_last = lastElem.date
+            dif_date = datetime.now(timezone.utc) - date_max_last
+            if dif_date.total_seconds() <= 3600 and (date_max == 0 or date_max < date_max_last):
+                date_max = date_max_last
+
+
 
         if 'depth' in request.POST:  # Модальная форма с скорректированными значениями
             depth_data = request.POST['depth'].replace(',', '.').replace(' ', '').replace('\r', ''). \
