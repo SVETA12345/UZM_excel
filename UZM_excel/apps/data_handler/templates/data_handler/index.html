@@ -52,11 +52,11 @@ body{ overflow: hidden; }
                 Выбор модели
             </h5>
         </div>
-        <div class="body">
+        <div class="body" >
             {% cache 500 navmenu %}
             <input class="form-control me-2" type="search" placeholder="Поиск..." onchange="search(this.value);">
             <br>
-            <div style="overflow-y: auto; max-height:80vh;">
+            <div style="overflow-y: auto; height:80vh;" id="menu">
                 <div id="search-field" hidden> <!-- Поле для поиска -->
                     {% for run in context.tree.search %}
                     <ul>
@@ -73,7 +73,7 @@ body{ overflow: hidden; }
                     </ul>
                     {% endfor %}
                 </div>
-                <div id="menu-field"> <!-- Поле для меню -->
+                <div id="menu-field" > <!-- Поле для меню -->
                     {% for dict in context.tree.main %}
                     <div class="DO" id='tree'>
                         <button class="collapsed btn btn-toggle" data-bs-toggle="collapse" onclick="SetClient({{dict.id}})" href="#Client{{dict.id}}">
@@ -103,7 +103,7 @@ body{ overflow: hidden; }
                                                                 <ul class="collapse run" id="Section{{section_dict.id}}">
                                                                     {% for run_dict in section_dict.runs %}
                                                                     <!--      Рейс      -->
-                                                                    <li style="cursor: pointer;"><a href="?run_id={{run_dict.id}}" id='Run{{run_dict.id}}' onclick="SetRun({{run_dict.id}})" class="run"> Рейс {{run_dict.run_number}} </a>
+                                                                    <li style="cursor: pointer;" id="reis"><a href="?run_id={{run_dict.id}}" id='Run{{run_dict.id}}' onclick="SetRun({{run_dict.id}})" class="run"> Рейс {{run_dict.run_number}} </a>
                                                                     </li>
                                                                     {% endfor %}
                                                                 </ul>
@@ -141,6 +141,7 @@ body{ overflow: hidden; }
 <script src="{% static 'js/nav_menu.js'%}"></script>
 
 <script>
+const menu=document.getElementById('menu')
 <!-- Поиск в дереве -->
 function search(string) {
   filter = string.replace(/\s+/g, ' ').trim().toUpperCase();
@@ -162,9 +163,28 @@ function search(string) {
     document.getElementById('search-field').hidden = true;
     }
 }
+// Сохраняем позицию скрола в меню
+menu.addEventListener('scroll', () => {
+    const savedPos = sessionStorage.getItem('scrollPos');
+    if (savedPos) {
+        sessionStorage.removeItem('scrollPos');
+    }
+    sessionStorage.setItem('scrollPos', menu.scrollTop);
+});
 
 <!-- Новое дерево открываем выбранный элемент -->
 window.addEventListener('load', () => {
+    // возвращаем скрол на исходную позицию
+    const savedPos = sessionStorage.getItem('scrollPos');
+    if (savedPos) {
+        setTimeout(function() {
+            menu.scrollTo({
+            top: savedPos,
+            left: 0,
+             behavior: "smooth"
+        });
+        }, 500);
+    }
   if (sessionStorage.getItem("client_id") !== null) {
     var selected_client = document.getElementById('Client'+ sessionStorage.getItem("client_id"));
     selected_client.classList.add('show');
@@ -226,6 +246,7 @@ function SetSection(id){
 function SetRun(id){
     sessionStorage.setItem("run_id", id)
 }
+
 </script>
 {% endblock %}
 
