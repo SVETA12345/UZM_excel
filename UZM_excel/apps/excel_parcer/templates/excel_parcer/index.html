@@ -20,7 +20,7 @@
         <div class="body">
             <input class="form-control me-2" type="search" placeholder="Поиск..." onchange="search(this.value);">
             <br>
-            <div style="overflow-y: auto; max-height:80vh;">
+            <div style="overflow-y: auto; max-height:80vh;" id="menu">
                 <div id="search-field" hidden>
                     {% for run in context.tree.search %}
                     <ul>
@@ -104,6 +104,15 @@
 </div>
 
 <script>
+const menu=document.getElementById('menu')
+// Сохраняем позицию скрола в меню
+menu.addEventListener('scroll', () => {
+    const savedPos = sessionStorage.getItem('scrollPos');
+    if (savedPos) {
+        sessionStorage.removeItem('scrollPos');
+    }
+    sessionStorage.setItem('scrollPos', menu.scrollTop);
+});
 <!-- Поиск в дереве -->
 function search(string) {
   filter = string.replace(/\s+/g, ' ').trim().toUpperCase();
@@ -128,6 +137,17 @@ function search(string) {
 
 <!-- Новое дерево открываем выбранный элемент -->
 window.addEventListener('load', () => {
+    // возвращаем скрол на исходную позицию
+    const savedPos = sessionStorage.getItem('scrollPos');
+    if (savedPos) {
+        setTimeout(function() {
+            menu.scrollTo({
+            top: savedPos,
+            left: 0,
+             behavior: "smooth"
+        });
+        }, 500);
+    }
   if (sessionStorage.getItem("client_id") !== null) {
     var selected_client = document.getElementById('Client'+ sessionStorage.getItem("client_id"));
     selected_client.classList.add('show');
