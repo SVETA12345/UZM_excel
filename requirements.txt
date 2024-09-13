@@ -22,3 +22,5 @@ django-debug-toolbar==4.3.0
 lasio
 python-pptx
 tqdm
+pandas
+pyperclip

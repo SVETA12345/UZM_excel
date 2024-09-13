@@ -95,15 +95,23 @@ def parcing_manually(path, manually_depth, manually_gx, manually_gy, manually_gz
     else:
         """Для обработки excel"""
         try:
+
             wb = load_workbook(filename=path, data_only=True)
+            #wb = pd.read_excel(path, engine='openpyxl')
+            print('why')
         except:
+
             x2x = XLS2XLSX(path)
+            print('xlsx', x2x)
             wb = x2x.to_xlsx()
 
         sheet = wb.active
+        print('sheet', sheet)
         for i, name in enumerate(
                 [manually_bz, manually_by, manually_bx, manually_gz, manually_gy, manually_gx, manually_depth]):
+            print('i, name', i, name)
             colum_id = column_index_from_string(name)
+
             for row_id in range(int(manually_import), sheet.max_row + 1):
                 cell = sheet.cell(row_id, colum_id)
                 if cell.value is not None:

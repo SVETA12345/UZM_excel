@@ -1,3 +1,6 @@
+#Импортируем pyperclip
+import pyperclip
+import pandas as pd
 from django.shortcuts import render, redirect
 from django.core.files.storage import FileSystemStorage
 
@@ -35,15 +38,20 @@ def index(request):
         context['well'] = current_run.section.wellbore.well_name
         context['selected_run'] = current_run
         context['data'] = Data.objects.filter(run=request.POST['run'], in_statistics=1).order_by('depth')
-        lastElem = Data.objects.filter(run=request.POST['run'], in_statistics=1).order_by('depth').last()
+        lastElem = Data.objects.filter(run=request.POST['run'], in_statistics=1).order_by('depth').latest("date")
+        print(lastElem.depth)
         # находим записи, котрые были добавлены в поледний час, это нужно для кнопки Откатить
         if lastElem and lastElem.date is not None:
             date_max_last = lastElem.date
             dif_date = datetime.now(timezone.utc) - date_max_last
             if dif_date.total_seconds() <= 3600 and (date_max == 0 or date_max < date_max_last):
                 date_max = date_max_last
-
-
+        # копируем последние добавленные данные в буфер обмена
+        if date_max!=0:
+            lastData= Data.objects.filter(run=request.POST['run'], in_statistics=1, date=date_max)
+            copy_data=pd.DataFrame(list(lastData.values('depth', 'CX', 'CY', 'CZ', 'BX', 'BY', 'BZ')))
+            clipboard_data=copy_data.to_csv(index=False, sep='	', header=False)
+            pyperclip.copy(clipboard_data)
 
         if 'depth' in request.POST:  # Модальная форма с скорректированными значениями
             depth_data = request.POST['depth'].replace(',', '.').replace(' ', '').replace('\r', ''). \
@@ -76,6 +84,7 @@ def edit_index(request):
             context['well'] = current_run.section.wellbore.well_name
             context['data'] = Data.objects.filter(run=current_run, in_statistics=1).order_by('depth')
             context['selected_run'] = current_run
+            print(context['data'][0].comment)
 
     # FIXME
     if request.method == 'POST':

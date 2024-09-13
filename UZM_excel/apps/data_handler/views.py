@@ -14,8 +14,6 @@ from excel_parcer.models import Data
 
 from .function.context_editer import *
 from .function.mail import *
-
-
 def index(request):
     """Главная страница"""
     return redirect(traj)

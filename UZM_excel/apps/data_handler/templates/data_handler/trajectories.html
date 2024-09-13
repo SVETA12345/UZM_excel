@@ -487,7 +487,6 @@ function Send_mail() {
     then(data=>{
         var FileName = data['file_name'];
         var Waste = data['waste'];
-        console.log(FileName);
             <!--  Задаём в пост запрос имя файла на скачивании  -->
             params = new FormData();
             params.set('name', FileName);
@@ -503,12 +502,14 @@ function Send_mail() {
                 anchorElement.click();
              })
     <!-- Генерация письма в Outlook -->
+    console.log('{{context.letter.body}}')
     const a_mail = document.createElement('a');
     const url = 'mailto:{{context.letter.mailto}}&cc={{context.letter.cc}}&body={{context.letter.body}}'+
     Math.abs(Waste['common'].toFixed(2))+'{{context.letter.comm_waste}}{{context.letter.hor_waste}}' +
     Math.abs(Waste['hor'].toFixed(2))+' м '+ Waste['word']['hor'] +'{{context.letter.ver_waste}}'+
     Math.abs(Waste['ver'].toFixed(2))+' м '+Waste['word']['ver']+
     '{{context.letter.endbody}}&subject='+String(FileName).slice(0, -5);
+    console.log('url', url)
     a_mail.href = url;
     a_mail.click();
 

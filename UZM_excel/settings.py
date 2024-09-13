@@ -5,7 +5,12 @@ from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # import structlog
-
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_PORT = 587                    # Порт для TLS
+EMAIL_USE_TLS = True                 # Используем TLS
+EMAIL_HOST = 'smtp-mail.outlook.com'
+EMAIL_HOST_USER = 'SA_Martyanova@igirgi.rosneft.ru'  # Ваш email
+EMAIL_HOST_PASSWORD = '365798hhghjjjjjjhh!!'
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 

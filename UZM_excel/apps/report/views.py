@@ -2,7 +2,7 @@ import os
 import time
 
 from django.http import JsonResponse, FileResponse, HttpResponse
-
+from django.conf import settings
 from Field.models import Run, Wellbore
 from .function.api_func import get_index
 from .function.final_report.general_report import FRCreator
@@ -12,7 +12,7 @@ from report.function.operational_report.work_with_Excel import write_data_in_Exc
 from report.function.operational_report.work_with_data import plan_delete, work_with_nnb
 from .models import *
 from .serializer import ProjectionParamSerializer
-
+from django.core.mail import send_mail
 
 # report/api/run_index
 def run_index(request):
@@ -41,6 +41,7 @@ def update_index(request):
 
 # report/api/file_name
 def report(request):
+
     """Делаем отчёт по имеющимся данным и отправляем его имя"""
     # по рейсу ищем все остальные рейсы скважины
     run = Run.objects.get(id=request.POST['run_id'])
