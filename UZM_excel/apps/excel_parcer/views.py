@@ -39,7 +39,6 @@ def index(request):
         context['selected_run'] = current_run
         context['data'] = Data.objects.filter(run=request.POST['run'], in_statistics=1).order_by('depth')
         lastElem = Data.objects.filter(run=request.POST['run'], in_statistics=1).order_by('depth').latest("date")
-        print(lastElem.depth)
         # находим записи, котрые были добавлены в поледний час, это нужно для кнопки Откатить
         if lastElem and lastElem.date is not None:
             date_max_last = lastElem.date
