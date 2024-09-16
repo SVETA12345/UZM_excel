@@ -38,7 +38,9 @@ def index(request):
         context['well'] = current_run.section.wellbore.well_name
         context['selected_run'] = current_run
         context['data'] = Data.objects.filter(run=request.POST['run'], in_statistics=1).order_by('depth')
-        lastElem = Data.objects.filter(run=request.POST['run'], in_statistics=1).order_by('depth').latest("date")
+        lastElem=[]
+        if len(context['data'])>0:
+            lastElem = Data.objects.filter(run=request.POST['run'], in_statistics=1).order_by('depth').latest("date")
         # находим записи, котрые были добавлены в поледний час, это нужно для кнопки Откатить
         if lastElem and lastElem.date is not None:
             date_max_last = lastElem.date
@@ -83,7 +85,6 @@ def edit_index(request):
             context['well'] = current_run.section.wellbore.well_name
             context['data'] = Data.objects.filter(run=current_run, in_statistics=1).order_by('depth')
             context['selected_run'] = current_run
-            print(context['data'][0].comment)
 
     # FIXME
     if request.method == 'POST':

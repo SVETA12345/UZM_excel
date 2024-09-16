@@ -126,7 +126,6 @@ class DataByRunAPIView(APIView):
         except Run.DoesNotExist:
             return Response({'status': f'Рейс с id {run_id} не найден'})
         update_obj = list()
-        print('rrrr', request.data)
         for meas in request.data:
             bd_data = Data.objects.get_or_create(depth=meas['depth'], run=current_run)
             update_obj.append(bd_data[0])
