@@ -64,7 +64,6 @@ class FieldNameSerializer(serializers.ModelSerializer):
 class Tree(serializers.ModelSerializer):
     fields = FieldNameSerializer(many=True)
     client = serializers.SerializerMethodField()
-
     class Meta:
         model = Client
         fields = ['id', 'client', 'fields', ]
