@@ -381,19 +381,13 @@ const copyData =() => {
     copyElements.forEach((item)=>{
         let clone = item.cloneNode(true);
 
-        clone=clone.querySelectorAll('.file_data')
+        //clone=clone.querySelectorAll('.file_data')
         row = document.createElement('tr')
-        //перебираем cтолбцы таблицы и меняем разделитель в данных с "." на ","
-        clone.forEach(function(elem, index) {
-            column=document.createElement('td')
-            column.innerText=elem.innerText.replace('.', ',')
-            row.append(column)
-        })
-    copyTable.append(row);
+    copyTable.append(clone);
     })
     if (copyElements) {
         document.body.appendChild(copyTable)
-        range.selectNodeContents(copyTable)
+        range.selectNode(copyTable)
         const selection=window.getSelection()
         selection.removeAllRanges();
         selection.addRange(range);
