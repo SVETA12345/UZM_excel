@@ -36,7 +36,6 @@
     justify-content: space-between;
 }
 .btn-reset{
-    margin-bottom: 10px;
     background-image: url(../image/reset.svg);
     background-color: yellow;
     background-size: contain;
@@ -63,4 +62,19 @@
     position: sticky;
     top: -3px;
     background: white;
+}
+.btn-copy{
+    margin-left: 10px;
+    background-image: url(../image/copy.png);
+    background-color: yellow;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    height: 40px;
+    width: 40px;
+    border: none;
+}
+
+.btn__container{
+    margin-bottom:10px;
 }

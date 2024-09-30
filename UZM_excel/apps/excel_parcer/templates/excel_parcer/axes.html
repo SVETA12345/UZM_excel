@@ -40,7 +40,10 @@
     {% else %}
     <img src="{% static 'image/grey.png' %}" alt="Не в активной фазе" style="width: 25px; height: 25px;">
     {% endif %}</h3>
-<button id="btn-reset" class="btn-reset" onclick="openPopupReset()" title="Откатить"></button>
+    <div class="btn__container">
+        <button id="btn-reset" class="btn-reset" onclick="openPopupReset()" title="Откатить"></button>
+        <button id="btn-copy" class="btn-copy" onclick="copyData()" title="Копировать" disabled=false></button>
+    </div>
 </div>
 <center>
     <div class="b-popup" id="popup">
@@ -86,15 +89,15 @@
 
                     <tbody>
                     {% for obj in context.data %}
-                    <tr style="{% if date_max != 0 and obj.date == date_max %} background-color:#90EE90; {% endif %}">
-                        <td style="background:none;" scope="col">{{obj.depth_dot}}</td>
-                        <td style="background:none;" scope="col">{{obj.CX_dot}}</td>
-                        <td style="background:none;" scope="col">{{obj.CY_dot}}</td>
-                        <td scope="col"
+                    <tr class="{% if date_max != 0 and obj.date == date_max %}copy{% else %}no-copy{% endif %}" style="{% if date_max != 0 and obj.date == date_max %} background-color:#90EE90; {% endif %}">
+                        <td class='file_data' style="background:none;" scope="col">{{obj.depth_dot}}</td>
+                        <td class='file_data' style="background:none;" scope="col">{{obj.CX_dot}}</td>
+                        <td class='file_data' style="background:none;" scope="col">{{obj.CY_dot}}</td>
+                        <td class='file_data' scope="col"
                             style="{% if obj.CZ < 0 %} background-color:#facfcf; {% else %} background:none; {% endif %}">{{obj.CZ_dot}}</td>
-                        <td style="background:none;" scope="col">{{obj.BX_dot}}</td>
-                        <td style="background:none;" scope="col">{{obj.BY_dot}}</td>
-                        <td  scope="col"
+                        <td class='file_data' style="background:none;" scope="col">{{obj.BX_dot}}</td>
+                        <td class='file_data' style="background:none;" scope="col">{{obj.BY_dot}}</td>
+                        <td class='file_data' scope="col"
                             style="{% if obj.BZ < 0 %} background-color:#facfcf; {% else %} background:none; {% endif %}">{{obj.BZ_dot}}</td>
                     </tr>
                     {% endfor %}
@@ -353,13 +356,66 @@
 <script>
 
 let openResetModalBut = document.getElementById('btn-reset');
-
+const copyButton = document.querySelector('.btn-copy');
 let closePopupButtonAll = document.querySelectorAll('.b-popup-content_close');
 let closePopupButton = document.getElementById('popup_close_no');
 let popupTitle = document.getElementById('popup-tile');
 let popup = document.getElementById('popup');
 let popupMessage = document.getElementById('popup_message');
 let popupSubmit = document.getElementById('popup_submit');
+let copyElements = document.querySelectorAll('.copy');
+let copyTable = document.createElement('table');
+
+if (!copyElements){
+    copyButton.disabled=true;
+}
+else{
+    copyButton.disabled=false;
+}
+//функция копирования данных таблицы в буфер обмена
+const copyData =() => {
+
+    let copyTableBody = copyTable.children
+    const range = document.createRange()
+    //перебираем строки таблицы
+    copyElements.forEach((item)=>{
+        let clone = item.cloneNode(true);
+
+        clone=clone.querySelectorAll('.file_data')
+        row = document.createElement('tr')
+        //перебираем cтолбцы таблицы и меняем разделитель в данных с "." на ","
+        clone.forEach(function(elem, index) {
+            column=document.createElement('td')
+            column.innerText=elem.innerText.replace('.', ',')
+            row.append(column)
+        })
+    copyTable.append(row);
+    })
+    if (copyElements) {
+        document.body.appendChild(copyTable)
+        range.selectNodeContents(copyTable)
+        const selection=window.getSelection()
+        selection.removeAllRanges();
+        selection.addRange(range);
+        popup.style.display ="block"
+        popupSubmit.style.display='none';
+        closePopupButton.style.display='none';
+        try {
+            popupTitle.innerText="Копирование"
+            popupMessage.innerText="Данные успешно скопировались"
+            popupTitle.style.color='green';
+            const successful = document.execCommand('copy')
+        }
+        catch {
+            popupTitle.innerText = "Ошибка";
+            popupMessage.innerText = `Произошла ошибка! Статус ошибки: ${response.status}`
+            popupTitle.style.color='red';
+            console.error(err)
+        }
+        document.body.removeChild(copyTable)
+    }
+}
+
 // кнопка Откатить при отсутствии актуальной даты становиться неактивной
 if ('{{date_max|safe}}' == '0'){
     openResetModalBut.setAttribute("disabled", "true");
@@ -396,7 +452,6 @@ document.querySelector('body').addEventListener('mouseup', (e)=>{
                 closePopupButton.style.display='none';
                 console.log(response)
                 if (!response.ok){
-                console.log('eheir')
                     popupTitle.innerText = "Ошибка";
                     popupMessage.innerText = `Произошла ошибка! Статус ошибки: ${response.status}`
                     popupTitle.style.color='red';
@@ -422,6 +477,7 @@ document.querySelector('body').addEventListener('mouseup', (e)=>{
         popupTitle.style.color='red';
         popupSubmit.style.display='block';
         closePopupButton.style.display='block';
+        popupMessage.innerText = `Вы точно хотите откатить изменения?`
         }
 
     <!-- Функция для сохранения комментариев к замерам -->

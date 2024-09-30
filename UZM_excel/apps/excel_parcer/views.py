@@ -1,6 +1,4 @@
-#Импортируем pyperclip
-import pyperclip
-import pandas as pd
+
 from django.shortcuts import render, redirect
 from django.core.files.storage import FileSystemStorage
 
@@ -47,12 +45,6 @@ def index(request):
             dif_date = datetime.now(timezone.utc) - date_max_last
             if dif_date.total_seconds() <= 3600 and (date_max == 0 or date_max < date_max_last):
                 date_max = date_max_last
-        # копируем последние добавленные данные в буфер обмена
-        if date_max!=0:
-            lastData= Data.objects.filter(run=request.POST['run'], in_statistics=1, date=date_max)
-            copy_data=pd.DataFrame(list(lastData.values('depth', 'CX', 'CY', 'CZ', 'BX', 'BY', 'BZ')))
-            clipboard_data=copy_data.to_csv(index=False, sep='	', header=False)
-            pyperclip.copy(clipboard_data)
 
         if 'depth' in request.POST:  # Модальная форма с скорректированными значениями
             depth_data = request.POST['depth'].replace(',', '.').replace(' ', '').replace('\r', ''). \
@@ -68,6 +60,7 @@ def index(request):
                         obj.Btotal_corr = (float(meas[1]) if float(meas[1]) > 100 else float(meas[1]) * 1000)
                         obj.DIP_corr = float(meas[2])
                         obj.save()
+                        context['data'] = Data.objects.filter(run=request.POST['run'], in_statistics=1).order_by('depth')
                     except:
                         context['error_depth'].append(float(meas[0]))
     return render(request, 'excel_parcer/axes.html', {'context': context, 'date_max': date_max,})
@@ -182,30 +175,30 @@ def graph(request):
             surveys = Data.objects.filter(run=run)
             for survey in surveys:
                 # График Goxy-Gz
-                context['depthGoxy'].append({'x': survey.depth, 'y': survey.get_goxy()})
-                context['depthGz'].append({'x': survey.depth, 'y': survey.CZ})
+                context['depthGoxy'].append({'x': survey.depth, 'y': survey.get_goxy() or 'Null'})
+                context['depthGz'].append({'x': survey.depth, 'y': survey.CZ or 'Null'})
                 # График Gtotal
-                context['depthGtotal'].append({'x': survey.depth, 'y': survey.Gtotal()})
-                context['depthGref'].append({'x': survey.depth, 'y': wellbore.well_name.gtotal_graph()})
-                context['depthGmax'].append({'x': survey.depth, 'y': wellbore.well_name.max_gtotal()})
-                context['depthGmin'].append({'x': survey.depth, 'y': wellbore.well_name.min_gtotal()})
+                context['depthGtotal'].append({'x': survey.depth, 'y': survey.Gtotal() or 'Null'})
+                context['depthGref'].append({'x': survey.depth, 'y': wellbore.well_name.gtotal_graph() or 'Null'})
+                context['depthGmax'].append({'x': survey.depth, 'y': wellbore.well_name.max_gtotal() or 'Null'})
+                context['depthGmin'].append({'x': survey.depth, 'y': wellbore.well_name.min_gtotal() or 'Null'})
                 # График Boxy-Bz
-                context['depthBoxy'].append({'x': survey.depth, 'y': survey.get_boxy()})
-                context['depthBz'].append({'x': survey.depth, 'y': survey.BZ})
+                context['depthBoxy'].append({'x': survey.depth, 'y': survey.get_boxy() or 'Null'})
+                context['depthBz'].append({'x': survey.depth, 'y': survey.BZ or 'Null'})
                 # График Btotal
-                context['depthBtotal'].append({'x': survey.depth, 'y': survey.Btotal()})
-                context['depthBref'].append({'x': survey.depth, 'y': wellbore.well_name.btotal_graph()})
-                context['depthBmax'].append({'x': survey.depth, 'y': wellbore.well_name.max_btotal()})
-                context['depthBmin'].append({'x': survey.depth, 'y': wellbore.well_name.min_btotal()})
+                context['depthBtotal'].append({'x': survey.depth, 'y': survey.Btotal() or 'Null'})
+                context['depthBref'].append({'x': survey.depth, 'y': wellbore.well_name.btotal_graph() or 'Null'})
+                context['depthBmax'].append({'x': survey.depth, 'y': wellbore.well_name.max_btotal() or 'Null'})
+                context['depthBmin'].append({'x': survey.depth, 'y': wellbore.well_name.min_btotal() or 'Null'})
                 context['depthBcorr'].append({'x': survey.depth, 'y': (survey.Btotal_corr if
                                                                        survey.Btotal_corr is not None else 'Null')})
                 # График HSTF
-                context['depthHSTF'].append({'x': survey.depth, 'y': survey.get_hstf()})
+                context['depthHSTF'].append({'x': survey.depth, 'y': survey.get_hstf() or 'Null'})
                 # График Dip
-                context['depthDipraw'].append({'x': survey.depth, 'y': survey.Dip()})
-                context['depthDipref'].append({'x': survey.depth, 'y': wellbore.well_name.dip_graph()})
-                context['depthDipmax'].append({'x': survey.depth, 'y': wellbore.well_name.max_dip()})
-                context['depthDipmin'].append({'x': survey.depth, 'y': wellbore.well_name.min_dip()})
+                context['depthDipraw'].append({'x': survey.depth, 'y': survey.Dip() or 'Null'})
+                context['depthDipref'].append({'x': survey.depth, 'y': wellbore.well_name.dip_graph() or 'Null'})
+                context['depthDipmax'].append({'x': survey.depth, 'y': wellbore.well_name.max_dip() or 'Null'})
+                context['depthDipmin'].append({'x': survey.depth, 'y': wellbore.well_name.min_dip() or 'Null'})
                 context['depthDipcorr'].append({'x': survey.depth, 'y': (survey.DIP_corr if
                                                                          survey.DIP_corr is not None else 'Null')})
 
