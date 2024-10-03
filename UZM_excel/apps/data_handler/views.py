@@ -65,6 +65,7 @@ def traj(request):
 
                 # Отходы
                 context["waste_hor"], context["waste_vert"], context["waste_common"] = waste(run.section.wellbore, True)
+
                 # Индексы отходов (Какие отходы выводить)
                 context["waste_index"] = list()
                 for ind, data in enumerate(IgirgiStatic.objects.filter(
@@ -89,7 +90,6 @@ def traj(request):
     if request.method == 'POST':
         run = Run.objects.get(id=request.GET.get('run_id'))
         context['title'] = run.section.wellbore.well_name.get_title()
-
         if 'plan_depth' in request.POST:  # данные с модальной формы 2 (плановая траектория)
             work_with_plan(request, run)
 

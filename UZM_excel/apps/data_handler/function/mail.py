@@ -28,11 +28,13 @@ class Letter:
             Wellbore.well_name.mail_Cc.replace('\r\n', ' ') if Wellbore.well_name.mail_Cc != '' else 'None')  # копия
         # тело письма
         self.warning = 'Бурение ведётся по траектории ИГиРГИ%0D%0A' if Wellbore.igirgi_drilling else ''
-        #if plan_version!='-':
-            #self.text_part = 'от плановой траектории '+ plan_version if Wellbore.igirgi_drilling else 'от траектории подрядчика ННБ'
-        #else:
-            #self.text_part = 'от плановой траектории' if Wellbore.igirgi_drilling else 'от траектории подрядчика ННБ'
-        self.text_part='от траектории подрядчика ННБ'
+        if plan_version != '-':
+            if Wellbore.igirgi_drilling:
+                self.text_part = 'от плановой траектории '+ plan_version
+            else:
+                self.text_part = 'от траектории подрядчика ННБ'
+        else:
+            self.text_part = 'от плановой траектории' if Wellbore.igirgi_drilling else 'от траектории подрядчика ННБ'
         self.body = 'Это тело письма'  # get_body() - перезаписывает все переменные ниже
         self.comm_waste = "Это строка с общими отходами"
         self.hor_waste = 'Это строка с горизонтальными отходами'
