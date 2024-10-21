@@ -509,10 +509,8 @@ function Send_mail() {
     Math.abs(Waste['hor'].toFixed(2))+' м '+ Waste['word']['hor'] +'{{context.letter.ver_waste}}'+
     Math.abs(Waste['ver'].toFixed(2))+' м '+Waste['word']['ver']+
     '{{context.letter.endbody}}&subject='+String(FileName).slice(0, -5);
-    console.log('url', url)
     a_mail.href = url;
     a_mail.click();
-
     document.getElementById("fa_send").hidden = true;
     })
 }

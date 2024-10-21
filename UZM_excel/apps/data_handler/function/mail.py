@@ -27,10 +27,10 @@ class Letter:
         self.cc = (
             Wellbore.well_name.mail_Cc.replace('\r\n', ' ') if Wellbore.well_name.mail_Cc != '' else 'None')  # копия
         # тело письма
-        self.warning = 'Бурение ведётся по траектории ИГиРГИ%0D%0A' if Wellbore.igirgi_drilling else ''
+        self.warning = 'Бурение ведётся по траектории ИГиРГИ.%0D%0A' if Wellbore.igirgi_drilling else ''
         if plan_version != '-':
             if Wellbore.igirgi_drilling:
-                self.text_part = 'от плановой траектории '+ plan_version
+                self.text_part = 'от плановой траектории'+ plan_version if Wellbore.igirgi_drilling else 'от траектории подрядчика ННБ'
             else:
                 self.text_part = 'от траектории подрядчика ННБ'
         else:
@@ -45,6 +45,7 @@ class Letter:
     def get_body(self):
         """Из записанных параметров скважины формируем string"""
         # %0D%0A - enter
+        print(self.warning)
         self.body = f"Контроль качества инклинометрии во время бурения:%0D%0A %0D%0A" \
                     f"Месторождение: {self.data_body.field}%0D%0A" \
                     f"Куст: {self.data_body.pad}%0D%0A" \

@@ -32,7 +32,10 @@ def FRCreator(run_id: int) -> tuple[str, str] | str:
 def standard_final(my_run, my_well, my_wellbore) -> str:
     """ Конструктор стандартных отчётов """
     # Шаблон всех итоговых отчётов
-    prs = Presentation(os.getcwd() + "\\files\\Шаблон\\Итоговый_отчет.pptx")
+    if my_run.section.wellbore.well_name.pad_name.field.client.client_name == 'UGNG':
+        prs = Presentation(os.getcwd() + "\\files\\Шаблон\\Юганск_итоговый.pptx")
+    else:
+        prs = Presentation(os.getcwd() + "\\files\\Шаблон\\Итоговый_отчет.pptx")
     # !!! Титульный слайд !!!
     TitleMaker(prs, my_well)
     # !!! Общая информация !!!

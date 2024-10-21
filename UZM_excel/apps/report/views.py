@@ -11,6 +11,7 @@ from report.function.final_report.samotlor_excel import final_report_excel
 from report.function.operational_report.work_with_Excel import write_data_in_Excel
 from report.function.operational_report.work_with_data import plan_delete, work_with_nnb
 from .models import *
+
 from .serializer import ProjectionParamSerializer
 from django.core.mail import send_mail
 
@@ -40,6 +41,7 @@ def update_index(request):
 
 
 # report/api/file_name
+
 def report(request):
 
     """Делаем отчёт по имеющимся данным и отправляем его имя"""
@@ -47,7 +49,6 @@ def report(request):
     run = Run.objects.get(id=request.POST['run_id'])
     runs = Run.objects.filter(section__wellbore=run.section.wellbore).order_by('run_number')
     plan = Plan.objects.filter(run__in=runs).last()
-
     runs = Run.objects.filter(section__wellbore=run.section.wellbore)
     all_data = get_data(runs)
     file_name, waste = write_data_in_Excel(all_data, f'Единая_форма_отчета.xlsx', run, plan)  # имя файла и отходы
@@ -66,6 +67,7 @@ def get_report_file(request):
 # report/api/final_report
 def get_final_report(request):
     """Получаем итоговый отчёт в pptx """
+
     file_dir = FRCreator(request.POST['run_id'])
     return FileResponse(open(file_dir, 'rb'))
 

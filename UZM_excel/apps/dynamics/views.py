@@ -31,14 +31,16 @@ def dynamics_traj(request):
         # Замеры
         context["igirgi_data"] = IgirgiDynamic.objects.filter(run=run_id)
         context["nnb_data"] = DynamicNNBData.objects.filter(run=run_id)
-
         # Отходы
         context["waste_hor"], context["waste_ver"], context["waste_common"] = waste(run.section.wellbore, full=False,
                                                                                     dynamic=True)
         try:
             last_igirgi = IgirgiDynamic.objects.filter(run=run_id).latest('depth')
             last_nnb = DynamicNNBData.objects.filter(run=run_id).latest('depth')
-            context['delta_depth'] = round(last_nnb.depth - last_igirgi.depth, 2)
+            min_depth = min(last_igirgi.depth, last_nnb.depth)
+            last_igirgi = IgirgiDynamic.objects.filter(run=run_id, depth=min_depth).latest('depth')
+            last_nnb = DynamicNNBData.objects.filter(run=run_id, depth=min_depth).latest('depth')
+            context['delta_depth'] = min_depth
             context['delta_corner'] = round(last_nnb.corner - last_igirgi.corner, 2)
             context['delta_azimut'] = round(last_nnb.azimut - last_igirgi.azimut, 2)
         except IgirgiDynamic.DoesNotExist:
@@ -75,7 +77,7 @@ def dynamics_traj(request):
                 print('Пропуск при вставке динамики', e)
         obj.objects.bulk_create(create_obj)
         obj.objects.bulk_update(update_obj, ["corner", "azimut", ])
-    print('CONTEXT', context)
+    #print(context['delta_depth'])
     return render(request, 'dynamics/dynamic_trajectories.html', {'context': context, })
 
 
@@ -112,6 +114,7 @@ def edit_dynamics_traj(request):
 
 
 def del_dynamics(request):
+
     """Удаление замеров динамики"""
     for key, value in request.POST.dict().items():
         if 'igirgi' in key:
