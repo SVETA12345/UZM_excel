@@ -40,13 +40,38 @@ def dynamics_traj(request):
             min_depth = min(last_igirgi.depth, last_nnb.depth)
             last_igirgi = IgirgiDynamic.objects.filter(run=run_id, depth=min_depth).latest('depth')
             last_nnb = DynamicNNBData.objects.filter(run=run_id, depth=min_depth).latest('depth')
+
             context['delta_depth'] = min_depth
             context['delta_corner'] = round(last_nnb.corner - last_igirgi.corner, 2)
             context['delta_azimut'] = round(last_nnb.azimut - last_igirgi.azimut, 2)
         except IgirgiDynamic.DoesNotExist:
-            pass
+            # ищем максимально приближённый по глубине элемент
+            min_dif = 10000
+            last_igirgi = None
+            all_igirgi = IgirgiDynamic.objects.filter(run=run_id).order_by('depth')
+            for elem in all_igirgi:
+                if abs(elem.depth - min_depth) <= 0.5 and min_dif > abs(elem.depth - min_depth):
+                    min_dif = abs(elem.depth - min_depth)
+                    last_igirgi = elem
+            # если подходядщая глубина найдена
+            if last_igirgi:
+                context['delta_depth'] = min_depth
+                context['delta_corner'] = round(last_nnb.corner - last_igirgi.corner, 2)
+                context['delta_azimut'] = round(last_nnb.azimut - last_igirgi.azimut, 2)
         except DynamicNNBData.DoesNotExist:
-            pass
+            # ищем максимально приближённый по глубине элемент
+            min_dif = 10000
+            last_nnb = None
+            all_nnb = DynamicNNBData.objects.filter(run=run_id).order_by('depth')
+            for elem in all_nnb:
+                if abs(elem.depth-min_depth)<=0.5 and min_dif>abs(elem.depth-min_depth):
+                    min_dif=abs(elem.depth-min_depth)
+                    last_nnb=elem
+            # если подходядщая глубина найдена
+            if last_nnb:
+                context['delta_depth'] = min_depth
+                context['delta_corner'] = round(last_nnb.corner - last_igirgi.corner, 2)
+                context['delta_azimut'] = round(last_nnb.azimut - last_igirgi.azimut, 2)
 
     if request.method == 'POST':
         update_obj = list()
@@ -77,7 +102,6 @@ def dynamics_traj(request):
                 print('Пропуск при вставке динамики', e)
         obj.objects.bulk_create(create_obj)
         obj.objects.bulk_update(update_obj, ["corner", "azimut", ])
-    #print(context['delta_depth'])
     return render(request, 'dynamics/dynamic_trajectories.html', {'context': context, })
 
 
