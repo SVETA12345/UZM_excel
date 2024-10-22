@@ -120,10 +120,11 @@
                 <table name="table-data" class="table table-light table-sm table-bordered table-hover">
                     <tbody>
                     {% for meas in context.nnb_data%}
-                    <tr>
-                        <td id="nnb_depth{{ forloop.counter0 }}" scope="col">{{meas.depth|formatted_float}}</td>
-                        <td id="nnb_cor{{ forloop.counter0 }}" scope="col">{{meas.corner|formatted_float}}</td>
-                        <td id="nnb_azimut{{ forloop.counter0 }}" scope="col">{{meas.azimut|formatted_float}}</td>
+
+                    <tr >
+                        <td style="{% if context.depths.nnb == meas.depth %} background-color:#90EE90; {% endif %}" id="nnb_depth{{ forloop.counter0 }}" scope="col">{{meas.depth|formatted_float}}</td>
+                        <td style="{% if context.depths.nnb == meas.depth %} background-color:#90EE90; {% endif %}" id="nnb_cor{{ forloop.counter0 }}" scope="col">{{meas.corner|formatted_float}}</td>
+                        <td style="{% if context.depths.nnb == meas.depth %} background-color:#90EE90; {% endif %}" id="nnb_azimut{{ forloop.counter0 }}" scope="col">{{meas.azimut|formatted_float}}</td>
                     </tr>
                     {% endfor %}
                     </tbody>
@@ -136,9 +137,9 @@
                     <tbody>
                     {% for meas in context.igirgi_data%}
                     <tr>
-                        <td id="igirgi_depth{{ forloop.counter0 }}" scope="col">{{meas.depth|formatted_float}}</td>
-                        <td id="igirgi_cor{{ forloop.counter0 }}" scope="col">{{meas.corner|formatted_float}}</td>
-                        <td id="igirgi_azimut{{ forloop.counter0 }}" scope="col">{{meas.azimut|formatted_float}}</td>
+                        <td style="{% if context.depths.igirgi == meas.depth %} background-color:#90EE90; {% endif %}" id="igirgi_depth{{ forloop.counter0 }}" scope="col">{{meas.depth|formatted_float}}</td>
+                        <td style="{% if context.depths.igirgi == meas.depth %} background-color:#90EE90; {% endif %}"  id="igirgi_cor{{ forloop.counter0 }}" scope="col">{{meas.corner|formatted_float}}</td>
+                        <td style="{% if context.depths.igirgi == meas.depth %} background-color:#90EE90; {% endif %}" id="igirgi_azimut{{ forloop.counter0 }}" scope="col">{{meas.azimut|formatted_float}}</td>
                     </tr>
                     {% endfor %}
                     </tbody>

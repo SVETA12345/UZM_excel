@@ -44,6 +44,8 @@ def dynamics_traj(request):
             context['delta_depth'] = min_depth
             context['delta_corner'] = round(last_nnb.corner - last_igirgi.corner, 2)
             context['delta_azimut'] = round(last_nnb.azimut - last_igirgi.azimut, 2)
+            # необходимо для подсветки зелёным цветом
+            context['depths'] = {'nnb': min_depth, 'igirgi': min_depth}
         except IgirgiDynamic.DoesNotExist:
             # ищем максимально приближённый по глубине элемент
             min_dif = 10000
@@ -58,6 +60,7 @@ def dynamics_traj(request):
                 context['delta_depth'] = min_depth
                 context['delta_corner'] = round(last_nnb.corner - last_igirgi.corner, 2)
                 context['delta_azimut'] = round(last_nnb.azimut - last_igirgi.azimut, 2)
+                context['depths'] = {'nnb': min_depth, 'igirgi': last_igirgi.depth}
         except DynamicNNBData.DoesNotExist:
             # ищем максимально приближённый по глубине элемент
             min_dif = 10000
@@ -72,6 +75,7 @@ def dynamics_traj(request):
                 context['delta_depth'] = min_depth
                 context['delta_corner'] = round(last_nnb.corner - last_igirgi.corner, 2)
                 context['delta_azimut'] = round(last_nnb.azimut - last_igirgi.azimut, 2)
+                context['depths'] = {'nnb': last_nnb.depth, 'igirgi': min_depth}
 
     if request.method == 'POST':
         update_obj = list()
