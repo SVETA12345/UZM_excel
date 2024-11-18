@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
             name='Client',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('client_name', models.CharField(choices=[('SMTL', 'Самотлорнефтегаз'), ('SKNG', 'Севкомнефтегаз'), ('UVAT', 'Уватнефтегаз'), ('SBNG', 'Сибнефтегаз'), ('UDMR', 'Удмуртнефть'), ('TUNG', 'ТЮНГ'), ('UGNG', 'Юганскнефтегаз'), ('SLAV', 'Славнефть'), ('HRNG', 'Харампурнефтегаз'), ('RNHA', 'РНША'), ('VOIL', 'Восток Ойл'), ('PRNG', 'Пурнефтегаз'), ('VCNG', 'ВЧНГ')], max_length=4, unique=True, verbose_name='Заказчик')),
+                ('client_name', models.CharField(choices=[('SMTL', 'Самотлорнефтегаз'), ('SKNG', 'Севкомнефтегаз'), ('UVAT', 'Уватнефтегаз'), ('SBNG', 'Сибнефтегаз'), ('UDMR', 'Удмуртнефть'), ('TUNG', 'ТЮНГ'), ('UGNG', 'Юганскнефтегаз'), ('SLAV', 'Славнефть'), ('HRNG', 'Харампурнефтегаз'), ('RNHA', 'РНША'), ('VOIL', 'Восток Ойл'), ('PRNG', 'Пурнефтегаз'), ('VCNG', 'ВЧНГ'), ('ROSPAN', 'РОСПАН ИНТЕРНЕШНЛ')], max_length=100, unique=True, verbose_name='Заказчик')),
             ],
             options={
                 'verbose_name': 'Дочернее общество',

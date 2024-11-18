@@ -15,7 +15,6 @@ from .models import *
 from .serializer import *
 from .serializerTree import Tree
 
-
 class ClientAPIView(APIView):
     @swagger_auto_schema(tags=['ДО'],
                          operation_summary="Получить все дочерние общества")

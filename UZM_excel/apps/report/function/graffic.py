@@ -158,6 +158,8 @@ def get_graphics(all_data: dict, wellbore: object, only_waste: bool = False) -> 
             -igirgi_delta_x
             -igirgi_TVD
     """
+
+
     well = wellbore.well_name
     data_dict = dict()  # словарь с данными, которые необходимо записать в эксель
 
@@ -376,13 +378,13 @@ def get_number_data(data_dict: dict, all_data: dict, dynamic: bool = False) -> t
     """Формируем данные для текста на графике [ПАРАМЕТРЫ ОТХОДА]"""
     number_data = dict()
     if dynamic:
-        number_data['Точка замера'] = all_data['Динамические замеры ИГИРГИ']['Глубина'][-1]
+        number_data['Точка замера'] = all_data['Динамические замеры для графика']['depths']['igirgi']
         X_nnb = data_dict['dynamic_nnb_delta_x'][-1]  # EW для отходов
         Y_nnb = data_dict['dynamic_nnb_delta_y'][-1]  # NS для отходов
         X_igirgi = data_dict['dynamic_igirgi_delta_x'][-1]  # EW для отходов
         Y_igigri = data_dict['dynamic_igirgi_delta_y'][-1]  # NS для отходов
         number_data['Абсолютная отметка'] = round(data_dict['dynamic_igirgi_TVDSS'][-1], 2)
-        number_data['Отход по вертикали'] = round(data_dict['dynamic_nnb_TVD'][-1] - data_dict['dynamic_igirgi_TVD'][-1], 2)
+        number_data['Отход по вертикали'] = all_data['Динамические замеры для графика']['wastes'][1]
     else:
         number_data['Точка замера'] = all_data['Статические замеры ИГИРГИ']['Глубина'][-1]
         X_nnb = data_dict['nnb_delta_x'][-1]  # EW для отходов

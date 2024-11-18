@@ -44,7 +44,6 @@ def add_field(request):
         if form.is_valid():
             form.save()
         return redirect(add_pad)
-
     context = {"title": 'Месторождение',
                "form": form,
                "method": "add_field",

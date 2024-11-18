@@ -12,11 +12,10 @@ class Client(models.Model):
     """Дочернее общество"""
     client_name = models.CharField(
         'Заказчик',
-        max_length=4,
+        max_length=6,
         choices=choices.CLIENT_CHOICES,
         unique=True
     )
-
     class Meta:
         verbose_name = 'Дочернее общество'
         verbose_name_plural = 'Дочерние общества'

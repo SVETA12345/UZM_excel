@@ -9,10 +9,9 @@
     <link type="text/css" href="{% static 'css/run/styles.css' %}" rel="stylesheet" />
     {% load crispy_forms_tags %}
 {% endblock %}
-
 {% block content %}
-    <br>
 
+    <br>
     <form class="container" action="{% url context.method %}" method="post">
         {% block data_field %}
         {{ context.form|crispy }}

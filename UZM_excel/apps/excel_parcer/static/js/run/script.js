@@ -1,5 +1,4 @@
 const allSelectors = document.querySelectorAll('.selector')
-
 allSelectors.forEach((item, index) => {
   item.addEventListener('change', () => {
     if (item.value) {

@@ -6,7 +6,7 @@ from ..models import *
 from django.db.models import Max, QuerySet
 from .graffic import get_graph_data, get_graphics
 from Field.models import Run
-
+from dynamics.functions.find_depth import find_depths
 
 def add_anchor_point(data: dict) -> dict:
     """Добавить точку привзяки [Добавляем 0 в начало каждого переданного массива]"""
@@ -28,6 +28,7 @@ def get_data(runs: Union[object, Iterable[object]]) -> dict:
     """
     Функция для перезаписи даты в работу, опираясь на данные из бд.
     """
+    dynaminc_proek_graphic = find_depths(runs=runs)
     if len(runs) == 0:  # передали не массив рейсов, а один рейс
         run = runs
         data = {'Статические замеры ИГИРГИ': IgirgiStatic.objects.filter(run=run),
@@ -38,6 +39,10 @@ def get_data(runs: Union[object, Iterable[object]]) -> dict:
                 }
         if run.section.wellbore.igirgi_drilling:
             data['Плановая траектория интерп'] = InterpPlan.objects.filter(run=run)
+        wastes = waste(wellbore=run.section.wellbore,
+                       full=False,
+                       dynamic=True,
+                       depths=dynaminc_proek_graphic['depths'])
     else:
         data = {'Статические замеры ИГИРГИ': IgirgiStatic.objects.filter(run__in=runs),
                 'Динамические замеры ННБ': DynamicNNBData.objects.filter(run__in=runs),
@@ -47,7 +52,10 @@ def get_data(runs: Union[object, Iterable[object]]) -> dict:
                 }
         if runs[0].section.wellbore.igirgi_drilling:
             data['Плановая траектория интерп'] = InterpPlan.objects.filter(run__in=runs)
-
+        wastes = waste(wellbore=runs[0].section.wellbore,
+                       full=False,
+                       dynamic=True,
+                       depths=dynaminc_proek_graphic['depths'])
     del_key = list()
     # преобразуем queryset в словарь с листами (3 отдельных массива - Глубина, Угол, Азимут)
     for key, queryset in data.items():
@@ -87,6 +95,9 @@ def get_data(runs: Union[object, Iterable[object]]) -> dict:
 
     if data.get('Динамические замеры ИГИРГИ') is not None:
         add_anchor_point(data['Динамические замеры ИГИРГИ'])
+
+    dynaminc_proek_graphic['wastes'] = wastes
+    data['Динамические замеры для графика'] = dynaminc_proek_graphic
     return data
 
 
@@ -132,24 +143,28 @@ def get_waste(my_wellbore):
     """По объекту ствола [ПАРАМЕТРЫ ОТХОДА]. Возвращает словарь слов (выше/ниже) и числами"""
     runs = Run.objects.filter(section__wellbore=my_wellbore)
     all_data = get_data(runs)
+
     return get_graphics(all_data, my_wellbore, only_waste=True)
 
 
-def waste(wellbore: object, full: bool = False, dynamic: bool = False):
+def waste(wellbore: object, full: bool = False, dynamic: bool = False, depths: object = None):
     """Возвращает численные значения отходов"""
-    if dynamic:
-        nnb = DynamicNNBData.objects.filter(run__section__wellbore=wellbore).order_by('depth')
-        igirgi = IgirgiDynamic.objects.filter(run__section__wellbore=wellbore).order_by('depth')
+    if depths:
+        nnb = DynamicNNBData.objects.filter(run__section__wellbore=wellbore, depth=depths['nnb'])
+        igirgi = IgirgiDynamic.objects.filter(run__section__wellbore=wellbore, depth=depths['igirgi'])
     else:
-        if wellbore.igirgi_drilling:  # если бурим по траектории ИГиРГИ то используем план вместо траектории ннб
-            nnb = InterpPlan.objects.filter(run__section__wellbore=wellbore).order_by('depth')
+        if dynamic:
+            nnb = DynamicNNBData.objects.filter(run__section__wellbore=wellbore).order_by('depth')
+            igirgi = IgirgiDynamic.objects.filter(run__section__wellbore=wellbore).order_by('depth')
         else:
-            nnb = StaticNNBData.objects.filter(run__section__wellbore=wellbore).order_by('depth')
-        igirgi = IgirgiStatic.objects.filter(run__section__wellbore=wellbore).order_by('depth')
+            if wellbore.igirgi_drilling:  # если бурим по траектории ИГиРГИ то используем план вместо траектории ннб
+                nnb = InterpPlan.objects.filter(run__section__wellbore=wellbore).order_by('depth')
+            else:
+                nnb = StaticNNBData.objects.filter(run__section__wellbore=wellbore).order_by('depth')
+            igirgi = IgirgiStatic.objects.filter(run__section__wellbore=wellbore).order_by('depth')
 
     igirgi_data, nnb_data = {'Угол': list(), 'Азимут': list(), 'Глубина': list()}, \
         {'Угол': list(), 'Азимут': list(), 'Глубина': list()}
-
     for meas in nnb:
         nnb_data['Угол'].append(meas.corner)
         nnb_data['Азимут'].append(meas.azimut)
@@ -174,7 +189,6 @@ def calculation_waste(wellbore: object, igirgi: dict, nnb: dict, full: bool = Fa
 
     RKB = (84 if wellbore.well_name.RKB is None else wellbore.well_name.RKB)
     VSaz = (1 if wellbore.well_name.VSaz is None else wellbore.well_name.VSaz)
-
     nnb_delta_x, nnb_delta_y, x2, y2, nnb_delta_TVD = get_graph_data(I=nnb['Угол'],
                                                                      A=nnb['Азимут'],
                                                                      Depth=nnb['Глубина'],

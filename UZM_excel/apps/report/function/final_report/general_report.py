@@ -22,6 +22,7 @@ def FRCreator(run_id: int) -> tuple[str, str] | str:
     # Объекты моделей
     my_run = Run.objects.get(id=run_id)
     param = {"my_run": my_run,
+             'run_id': run_id,
              "my_well": my_run.section.wellbore.well_name,
              "my_wellbore": my_run.section.wellbore}
     if my_run.section.wellbore.well_name.pad_name.field.client.client_name == 'SMTL':
@@ -29,7 +30,7 @@ def FRCreator(run_id: int) -> tuple[str, str] | str:
     return standard_final(**param)
 
 
-def standard_final(my_run, my_well, my_wellbore) -> str:
+def standard_final(my_run, run_id, my_well, my_wellbore) -> str:
     """ Конструктор стандартных отчётов """
     # Шаблон всех итоговых отчётов
     if my_run.section.wellbore.well_name.pad_name.field.client.client_name == 'UGNG':

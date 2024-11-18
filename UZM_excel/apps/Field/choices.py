@@ -20,12 +20,13 @@
     ('PUR', 'ООО "РН-Пурнефтегаз"'),
     ('BND', 'ООО "Башнефть-Добыча"'),
     ('TNG', 'АО "Тюменьнефтегаз"'),
+    ('ROSPAN', 'АО "РОСПАН ИНТЕРНЕШНЛ"'),
 ]
-
 
 def get_full_choices(first: str, choices: list) -> str:
     """Функция для выдачи полного имени заказчика"""
     for item_tuple in choices:
+        #print('item', item_tuple, 'first', first)
         if first in item_tuple:
             return item_tuple[1]
 

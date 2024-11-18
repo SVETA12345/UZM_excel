@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 
 from Field.views_api import get_tree
 from Field.models import Run
-
+from .functions.find_depth import find_depths
 from report.models import IgirgiDynamic, DynamicNNBData
 
 from report.function.model_service import waste
@@ -17,7 +17,9 @@ def dynamics_traj(request):
     context = {'active': 'dynamics',
                'title': 'Динамическая траектория',
                "tree": get_tree(),
+               'depths':{},
                }
+    context_max_depths={}
 
     if request.GET.get('run_id') is not None:  # если в get запросе не run_id выводим пустую страницу
         run_id = request.GET.get('run_id')
@@ -31,52 +33,13 @@ def dynamics_traj(request):
         # Замеры
         context["igirgi_data"] = IgirgiDynamic.objects.filter(run=run_id)
         context["nnb_data"] = DynamicNNBData.objects.filter(run=run_id)
+        context_max_depths = find_depths(run_id)
+        context = {**context, **context_max_depths}
         # Отходы
-        context["waste_hor"], context["waste_ver"], context["waste_common"] = waste(run.section.wellbore, full=False,
-                                                                                    dynamic=True)
-        try:
-            last_igirgi = IgirgiDynamic.objects.filter(run=run_id).latest('depth')
-            last_nnb = DynamicNNBData.objects.filter(run=run_id).latest('depth')
-            min_depth = min(last_igirgi.depth, last_nnb.depth)
-            last_igirgi = IgirgiDynamic.objects.filter(run=run_id, depth=min_depth).latest('depth')
-            last_nnb = DynamicNNBData.objects.filter(run=run_id, depth=min_depth).latest('depth')
-
-            context['delta_depth'] = min_depth
-            context['delta_corner'] = round(last_nnb.corner - last_igirgi.corner, 2)
-            context['delta_azimut'] = round(last_nnb.azimut - last_igirgi.azimut, 2)
-            # необходимо для подсветки зелёным цветом
-            context['depths'] = {'nnb': min_depth, 'igirgi': min_depth}
-        except IgirgiDynamic.DoesNotExist:
-            # ищем максимально приближённый по глубине элемент
-            min_dif = 10000
-            last_igirgi = None
-            all_igirgi = IgirgiDynamic.objects.filter(run=run_id).order_by('depth')
-            for elem in all_igirgi:
-                if abs(elem.depth - min_depth) <= 0.5 and min_dif > abs(elem.depth - min_depth):
-                    min_dif = abs(elem.depth - min_depth)
-                    last_igirgi = elem
-            # если подходядщая глубина найдена
-            if last_igirgi:
-                context['delta_depth'] = min_depth
-                context['delta_corner'] = round(last_nnb.corner - last_igirgi.corner, 2)
-                context['delta_azimut'] = round(last_nnb.azimut - last_igirgi.azimut, 2)
-                context['depths'] = {'nnb': min_depth, 'igirgi': last_igirgi.depth}
-        except DynamicNNBData.DoesNotExist:
-            # ищем максимально приближённый по глубине элемент
-            min_dif = 10000
-            last_nnb = None
-            all_nnb = DynamicNNBData.objects.filter(run=run_id).order_by('depth')
-            for elem in all_nnb:
-                if abs(elem.depth-min_depth)<=0.5 and min_dif>abs(elem.depth-min_depth):
-                    min_dif=abs(elem.depth-min_depth)
-                    last_nnb=elem
-            # если подходядщая глубина найдена
-            if last_nnb:
-                context['delta_depth'] = min_depth
-                context['delta_corner'] = round(last_nnb.corner - last_igirgi.corner, 2)
-                context['delta_azimut'] = round(last_nnb.azimut - last_igirgi.azimut, 2)
-                context['depths'] = {'nnb': last_nnb.depth, 'igirgi': min_depth}
-
+        context["waste_hor"], context["waste_ver"], context["waste_common"] = waste(wellbore=run.section.wellbore,
+                                                                                    full=False,
+                                                                                    dynamic=True,
+                                                                                    depths=context['depths'])
     if request.method == 'POST':
         update_obj = list()
         create_obj = list()
@@ -106,6 +69,7 @@ def dynamics_traj(request):
                 print('Пропуск при вставке динамики', e)
         obj.objects.bulk_create(create_obj)
         obj.objects.bulk_update(update_obj, ["corner", "azimut", ])
+
     return render(request, 'dynamics/dynamic_trajectories.html', {'context': context, })
 
 
