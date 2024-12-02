@@ -25,7 +25,6 @@ def find_depths(run_id: int = None, runs=None):
             all_igirgi = IgirgiDynamic.objects.filter(run__in=runs).order_by('depth')
             all_nnb = DynamicNNBData.objects.filter(run__in=runs).order_by('depth')
             if len(list(all_igirgi)) > 0 and len(list(all_nnb)) > 0:
-                print('blet')
                 last_igirgi = list(all_igirgi)[-1]
                 last_nnb = list(all_nnb)[-1]
                 max_depth = min(last_igirgi.depth, last_nnb.depth)

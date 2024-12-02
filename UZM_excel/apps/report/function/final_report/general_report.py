@@ -53,7 +53,7 @@ def standard_final(my_run, run_id, my_well, my_wellbore) -> str:
     return file_dir
 
 
-def samotlor_final(my_run, my_well, my_wellbore) -> str:
+def samotlor_final(my_run, run_id,  my_well, my_wellbore) -> str:
     """ Конструктор отчётов для Самотлора """
     if my_well.get_well_type() == 'ВНС':
         prs = Presentation(os.getcwd() + "\\files\\Шаблон\\Самотлорское_итоговый_ВНС.pptx")
