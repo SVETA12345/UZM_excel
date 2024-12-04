@@ -150,8 +150,8 @@ def get_waste(my_wellbore):
 def waste(wellbore: object, full: bool = False, dynamic: bool = False, depths: object = None):
     """Возвращает численные значения отходов"""
     if depths:
-        nnb = DynamicNNBData.objects.filter(run__section__wellbore=wellbore, depth=depths['nnb'])
-        igirgi = IgirgiDynamic.objects.filter(run__section__wellbore=wellbore, depth=depths['igirgi'])
+        nnb = DynamicNNBData.objects.filter(run__section__wellbore=wellbore, depth__lte=depths['nnb'])
+        igirgi = IgirgiDynamic.objects.filter(run__section__wellbore=wellbore, depth__lte=depths['igirgi'])
     else:
         if dynamic:
             nnb = DynamicNNBData.objects.filter(run__section__wellbore=wellbore).order_by('depth')
@@ -165,6 +165,7 @@ def waste(wellbore: object, full: bool = False, dynamic: bool = False, depths: o
 
     igirgi_data, nnb_data = {'Угол': list(), 'Азимут': list(), 'Глубина': list()}, \
         {'Угол': list(), 'Азимут': list(), 'Глубина': list()}
+
     for meas in nnb:
         nnb_data['Угол'].append(meas.corner)
         nnb_data['Азимут'].append(meas.azimut)
@@ -194,7 +195,6 @@ def calculation_waste(wellbore: object, igirgi: dict, nnb: dict, full: bool = Fa
                                                                      Depth=nnb['Глубина'],
                                                                      RKB=RKB,
                                                                      VSaz=VSaz)
-
     igirgi_delta_x, igirgi_delta_y, x2, y2, igirgi_delta_TVD = get_graph_data(I=igirgi['Угол'],
                                                                               A=igirgi['Азимут'],
                                                                               Depth=igirgi['Глубина'],
@@ -230,7 +230,6 @@ def calculation_waste(wellbore: object, igirgi: dict, nnb: dict, full: bool = Fa
         X_igirgi = igirgi_delta_x[-1]
         Y_nnb = nnb_delta_y[-1]
         Y_igigri = igirgi_delta_y[-1]
-
         horiz = round(sqrt((X_nnb - X_igirgi) ** 2 + (Y_nnb - Y_igigri) ** 2), 2)  # отход по горизонтали
         vert = round(nnb_delta_TVD[-1] - igirgi_delta_TVD[-1], 2)  # отход по вертикали
         departure = round(
