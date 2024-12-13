@@ -29,6 +29,12 @@ def index(request):
         # получение данных для отображения
         try:
             current_run = Run.objects.get(id=request.POST['run'])
+            data_obj = Data.objects.filter(run=request.POST['run'], in_statistics=1).order_by('depth')
+            print(request.POST['run'])
+            if data_obj:
+                current_run.start_depth = list(data_obj)[0].depth
+                current_run.end_depth = list(data_obj)[-1].depth
+                current_run.save()
             context['title'] = current_run.section.wellbore.well_name.get_title()
         except Exception as e:
             print(e)
@@ -164,7 +170,7 @@ def graph(request):
                'depthBoxy': list(), 'depthBz': list(), 'depthBtotal': list(), 'depthBref': list(), 'depthBmax': list(),
                'depthBmin': list(), 'depthBcorr': list(), 'depthDipraw': list(), 'depthDipref': list(),
                'depthDipmax': list(), 'depthDipmin': list(), 'depthDipcorr': list(), 'depthHSTF': list(),
-               'selected': 'None'}
+               'selected': 'None', 'depths_reis':{}, 'x':list()}
 
     if request.method == 'POST' and request.POST['wellbore'] != '':
         wellbore = Wellbore.objects.get(id=request.POST['wellbore'])
@@ -172,10 +178,13 @@ def graph(request):
         runs = Run.objects.filter(section__wellbore=wellbore)
         context['selected'] = wellbore
         for run in runs:
+            if run.start_depth and run.end_depth:
+                context['depths_reis'][str(run.run_number)] = [run.start_depth, run.end_depth]
             surveys = Data.objects.filter(run=run)
             for survey in surveys:
+                context['x']+=[survey.depth]
                 # График Goxy-Gz
-                context['depthGoxy'].append({'x': survey.depth, 'y': survey.get_goxy() or 'Null'})
+                context['depthGoxy'].append({'x': survey.depth, 'y': survey.get_goxy() or 'Null', 'label': 'Рейс ' + str(run.run_number)})
                 context['depthGz'].append({'x': survey.depth, 'y': survey.CZ or 'Null'})
                 # График Gtotal
                 context['depthGtotal'].append({'x': survey.depth, 'y': survey.Gtotal() or 'Null'})
@@ -207,7 +216,6 @@ def graph(request):
         context['lastDepth'] = context['depthHSTF'][-1]['x']
     except IndexError:
         context['firstDepth'] = context['lastDepth'] = 0
-
     return render(request, 'excel_parcer/graph.html', {'context': context, })
 
 

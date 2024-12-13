@@ -48,6 +48,10 @@
         </svg>
         Сохранить
       </button>
+      <div class="reises__button">
+          <p class="col-sm-5 col-form-label">Границы рейсов:</p>
+          <button class="checkbox"></button>
+        </div>
     </div>
   </div>
   <br>
@@ -61,17 +65,11 @@
           <label>Максимальное значение: <input name="depthMax" type="number" step="0.0000001"></label>
           <label>Шаг: <input name="depthStep" type="number" step="10"></label>
         </div>
-        <label>Goxy,G</label>
+        <label>Gxyz,G</label>
         <div class="mb-3">
           <label>Минимальное значение: <input name="minGoxy" type="number" step="0.0000001"></label>
           <label>Максимальное значение: <input name="maxGoxy" type="number" step="0.0000001"></label>
           <label>Шаг: <input name="stepGoxy" type="number" step="0.0000001"></label>
-        </div>
-        <label>Gz,G </label>
-        <div class="mb-3">
-          <label>Минимальное значение: <input name="minGz" type="number" step="0.0000001"></label>
-          <label>Максимальное значение: <input name="maxGz" type="number" step="0.0000001"></label>
-          <label>Шаг: <input name="stepGz" type="number" step="0.0000001"></label>
         </div>
         <div class="container-btn" >
           <button type="submit" id="sbtn">Submit</button>
@@ -109,17 +107,11 @@
           <label>Максимальное значение: <input name="depthMax" type="number" step="0.0000001"></label>
           <label>Шаг: <input name="depthStep" type="number" step="0.0000001"></label>
         </div>
-        <label>Boxy,нТл</label>
+        <label>Bxyz,нТл</label>
         <div class="mb-3">
           <label>Минимальное значение: <input name="minBoxy" type="number" step="0.0000001"></label>
           <label>Максимальное значение: <input name="maxBoxy" type="number" step="0.0000001"></label>
           <label>Шаг: <input name="stepBoxy" type="number" step="0.0000001"></label>
-        </div>
-        <label>Bz,нТл </label>
-        <div class="mb-3">
-          <label>Минимальное значение: <input name="minBz" type="number" step="0.0000001"></label>
-          <label>Максимальное значение: <input name="maxBz" type="number" step="0.0000001"></label>
-          <label>Шаг: <input name="stepBz" type="number" step="0.0000001"></label>
         </div>
         <div class="container-btn" >
           <button type="submit" id="sbtnB">Submit</button>
@@ -186,9 +178,10 @@
     </div>
   </div>
 </center>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/0.6.6/chartjs-plugin-zoom.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@0.5.7/chartjs-plugin-annotation.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/0.6.6/chartjs-plugin-zoom.js"></script>
 <script type="text/javascript" >
 
 /// Получение ссылки на элемент canvas в DOM
@@ -198,7 +191,12 @@ const grafica3 = document.querySelector('#grafica3');
 const grafica4 = document.querySelector('#grafica4');
 const grafica5 = document.querySelector('#grafica5');
 const grafica6 = document.querySelector('#grafica6');
- 
+let ChartGr1 = {}
+let ChartGr2 = {}
+let ChartGr3 = {}
+let ChartGr4 = {}
+let ChartGr5 = {}
+let ChartGr6 = {}
 //Получаем ссылкии на кнопки в DOM
 let form = document.getElementById('form');
 let formGtotal = document.getElementById('formGtotal');
@@ -216,6 +214,59 @@ let closePopupButton = document.getElementById('popup_close');
 let popup = document.getElementById('popup');
 let popupTitle = document.getElementById('popup-tile');
 let popupMessage = document.getElementById('popup_message');
+const reisesCheckbox = document.querySelector('.checkbox');
+
+changeVerticalLines = (graphic, isPasiveCheckbox) =>{
+  if (isPasiveCheckbox) graphic.config.options.plugins.verticalLinePlugin.color = '#ADD8E6';
+  else graphic.config.options.plugins.verticalLinePlugin.color = 'rgba(0, 0, 0, 0)';
+  graphic.update()
+}
+//Обновление графиков при клике по кнопке Submit
+changeGraphic = (graphic, minY, maxY, stepY, nameY, minX, maxX, stepX) => {
+  graphic.config.options.scales = {
+        yAxes: [{
+          id: 'A',
+          scaleLabel: {
+            display: true,
+            labelString: nameY,
+          },
+          ticks: {
+            max: maxY,
+            min: minY,
+            stepSize: stepY,
+          },
+          type: 'linear',
+          position: 'left',
+         },
+        ],
+        xAxes: [{
+           scaleLabel: {
+            display: true,
+            labelString: 'Измеренная глубина, м',
+          },
+           ticks: {
+            min:minX,
+            max:maxX,
+            stepSize: stepX,
+            },
+        }],
+
+      }
+      graphic.update();
+}
+// обрабатываем клик по чекбоксу границей рейсов
+reisesCheckbox.addEventListener('click',(e) =>{
+  const isPasiveCheckbox = reisesCheckbox.classList.value.split(' ').find(item => item == 'checkbox_pasive');
+  changeVerticalLines(ChartGr1, isPasiveCheckbox);
+  changeVerticalLines(ChartGr2, isPasiveCheckbox);
+  changeVerticalLines(ChartGr3, isPasiveCheckbox);
+  changeVerticalLines(ChartGr4, isPasiveCheckbox);
+  changeVerticalLines(ChartGr5, isPasiveCheckbox);
+  changeVerticalLines(ChartGr6, isPasiveCheckbox);
+  if (isPasiveCheckbox) reisesCheckbox.classList.remove('checkbox_pasive');
+  else reisesCheckbox.classList.add('checkbox_pasive');
+});
+
 closePopupButton.addEventListener('click',(e) =>{
   popup.style.display='none';
 })
@@ -264,6 +315,15 @@ const depthDipref = {{ context.depthDipref | safe }}.sort(field_sort);
 const depthDipraw = {{ context.depthDipraw | safe }}.sort(field_sort);
 const depthDipcorr = {{ context.depthDipcorr | safe }}.sort(field_sort);
 
+//Начало и окончание рейса (необходимо для вертикальных линий)
+let depthReis = {{ context.depths_reis | safe }}
+console.log(depthReis)
+let coordVerticalLines = []
+let nameVerticalLines = []
+for (let key in depthReis){
+  coordVerticalLines.push({x:depthReis[key][1], label: key})
+  nameVerticalLines.push(key)
+}
 
 //обработка отправки формы
 let reload = (cl) =>{
@@ -286,18 +346,18 @@ for (let i = 0; i < array.length; i+=1) {
 return coords;
 };
 function getXminValue(array) {
-var coords = [];
-for (let i = 0; i < array.length; i+=1) {
-   coords.push(array[i].x)
-}
-return coords;
+  var coords = [];
+  for (let i = 0; i < array.length; i+=1) {
+    coords.push(array[i].x)
+  }
+  return coords;
 };
 function getYmaxValue(array) {
-var coords = [];
-for (let i = 0; i < array.length; i+=1) {
-   coords.push(array[i].y)
-} 
-return coords;
+  var coords = [];
+  for (let i = 0; i < array.length; i+=1) {
+    coords.push(array[i].y)
+  }
+  return coords;
 };
 //обработка изменений значений глубины(изменения вносяться во все графики)
 document.querySelectorAll('[name="form_depth"]').forEach((elem)=>{elem.addEventListener('keyup', function(event) {
@@ -332,116 +392,27 @@ document.querySelectorAll('[name="form_depth"]').forEach((elem)=>{elem.addEventL
 form.addEventListener('submit',(e) => {
   minGoxy = Number((form.querySelector('[name="minGoxy"]')).value),
   maxGoxy = Number((form.querySelector('[name="maxGoxy"]')).value),
-  stepGoxy = Number((form.querySelector('[name="stepGz"]')).value),
+  stepGoxy = Number((form.querySelector('[name="stepGoxy"]')).value),
   depthMin = Number((form.querySelector('[name="depthMin"]')).value),
   depthMax = Number((form.querySelector('[name="depthMax"]')).value),
   depthStep = Number((form.querySelector('[name="depthStep"]')).value),
-  minGz = Number((form.querySelector('[name="minGz"]')).value),
-  maxGz = Number((form.querySelector('[name="maxGz"]')).value),
-  stepGz = Number((form.querySelector('[name="stepGz"]')).value),
+  //minGz = Number((form.querySelector('[name="minGz"]')).value),
+  //maxGz = Number((form.querySelector('[name="maxGz"]')).value),
+  //stepGz = Number((form.querySelector('[name="stepGz"]')).value),
   e.preventDefault();
   
   // заменяем график
-  c = document.createElement('canvas');
-  c.setAttribute("id", "grafica7");
-  c.setAttribute("width", "50");
-  c.setAttribute("height", "15");
-  grafica1.replaceWith(c);
-  grafica7 = document.querySelector('#grafica7');
+
+
   arr = getXmaxValue(depthGoxy);
   arr1 = getYmaxValue(depthGoxy);
-  arr2 = getYmaxValue(depthGz);
+  //arr2 = getYmaxValue(depthGz);
   if (depthMax == 0 )
    depthMax = Math.max(...arr);
-  if (maxGz == 0)
-     maxGz = Math.max(...arr2) + 0.5;
   if (maxGoxy == 0)
   maxGoxy = Math.max(...arr1) + 0.5;
-   
-  new Chart(grafica7,
-  {
-    type: 'scatter', // Тип графики
-    backgroundColor:'rgba(0, 0, 255)',
-    data: {
-      datasets: [
-        {
-          label: 'Goxy',
-          yAxisID: 'A',
-          data: depthGoxy,
-          showLine: true,
-          fill: false,
-          borderColor: 'rgba(0, 0, 255)',
-         },
-        {
-          label: 'Gz',
-          yAxesID: 'B',
-          data: depthGz,
-          showLine: true,
-          fill: false,
-          borderColor: 'rgba(200, 0, 0, 1)',
-        },
-      ],
-    },
-    options: {
-      title: {
-            display: true,
-            text: 'График соотношения показаний осевого и поперечных акселерометров',
-            position: 'top',
-            fontSize: 16,
-            padding: 20,
-        },
-      scales: {
-        yAxes: [{
-          id: 'A',
-          scaleLabel: {
-          display: true,
-          labelString: 'Goxy, G',
-          },
-          type: 'linear',
-          position: 'left',
-          ticks: {
-            max: maxGoxy,
-            min: minGoxy,
-            stepSize: stepGoxy,
-          },
-        },
-        {
-          id: 'B',
-          scaleLabel: {
-            display: true,
-            labelString: 'Gz, G',
-          },
-          type: 'linear',
-          position: 'right',
-          ticks: {
-            max: maxGz,
-            min: minGz,
-            stepSize: stepGz,
-          },
-        }],
-        xAxes: [{
-          ticks: {
-            min:depthMin,
-            max:depthMax,
-            stepSize: depthStep,
-            autoSkip: false,
-            },
-          scaleLabel: {
-            display: true,
-            labelString: 'Измеренная глубина, м',
-          },
-        }],
-      },
-      pan: {
-        enabled: true,
-        mode: 'xy',
-      },
-      zoom: {
-        enabled: true,
-        mode: 'y',
-      },
-    },
-  });
+  changeGraphic(ChartGr1, minGoxy, maxGoxy, stepGoxy, 'Gxyz, G', depthMin, depthMax, depthStep)
+
 })
 
 //Обработка кнопки Submit и получаем значение полей ввода для графика Gtotal
@@ -457,12 +428,6 @@ formGtotal.addEventListener('submit',(e) => {
   depthMax = Number((formGtotal.querySelector('[name="depthMax"]')).value),
   depthStep = Number((formGtotal.querySelector('[name="depthStep"]')).value)
 
-  c = document.createElement('canvas');
-  c.setAttribute("id", "grafica8");
-  c.setAttribute("width", "50");
-  c.setAttribute("height", "15");
-  grafica2.replaceWith(c);
-  grafica8 = document.querySelector('#grafica8');
   arr = getXmaxValue(depthGtotal);
   arr1 = getYmaxValue(depthGtotal);
   if (depthMax == 0 )
@@ -471,94 +436,7 @@ formGtotal.addEventListener('submit',(e) => {
      maxGtotal= Math.max(...arr1);
   if (minGtotal == 0 )
      minGtotal = Math.min(...arr1)-0.005;
-
-  new Chart(grafica8,
-  {
-    type: 'scatter', // Тип графики
-    data: {
-      datasets: [
-        {
-          label: 'Gtotal',
-          yAxisID: 'A',
-          data: depthGtotal,
-          showLine: true,
-          fill: false,
-          borderColor: 'rgba(253, 233, 16)',
-        },
-        {
-          yAxesID: 'B',
-          label: 'Gref',
-          data: depthGrefFixed,
-          showLine: true,
-          showLabel: false,
-          fill: false,
-          borderColor: 'rgba(102, 255, 0)',
-        },
-        {
-          yAxesID: 'C',
-          label: 'Gmax',
-          data: depthGmax,
-          showLine: true,
-          fill: false,
-          borderColor: 'rgba( 255,0,51)',
-        },
-        {
-          yAxesID: 'D',
-          data: depthGmin,
-          label: 'Gmin',
-          showLine: true,
-          fill: false,
-          borderColor: 'rgba( 255,0,51)',
-        },
-      ],
-    },
-    options: {
-      title: {
-            display: true,
-            text: 'График напряженности гравитационного поля',
-            position: 'top',
-            fontSize: 16,
-            padding: 20,
-        },
-      scales: {
-        yAxes: [{
-          id: 'A',
-          scaleLabel: {
-            display: true,
-            labelString: 'Gtotal, G',
-          },
-          type: 'linear',
-          position: 'left',
-          ticks: {
-            max: maxGtotal,
-            min: minGtotal,
-            stepSize: stepGtotal,
-          },
-        }],
-        // for zooming
-        xAxes: [{
-          ticks: {
-            min:depthMin,
-            max:depthMax,
-            stepSize: depthStep,
-            autoSkip: false,
-            },
-          scaleLabel: {
-            display: true,
-            labelString: 'Измеренная глубина, м',
-          },
-        }],
-      },
-      pan: {
-        enabled: true,
-        mode: 'xy',
-      },
-      zoom: {
-        enabled: true,
-        mode: 'y',
-      },
-    },
-  });
+  changeGraphic(ChartGr2, minGtotal, maxGtotal, stepGtotal, 'Gtotal, G', depthMin, depthMax, depthStep)
   });
 
 //Обработка кнопки Submit и получаем значение полей ввода для графика осевых магнитометров
@@ -571,116 +449,20 @@ formB.addEventListener('submit',(e) => {
   depthMin = Number((formB.querySelector('[name="depthMin"]')).value),
   depthMax = Number((formB.querySelector('[name="depthMax"]')).value),
   depthStep = Number((formB.querySelector('[name="depthStep"]')).value),
-  minBz = Number((formB.querySelector('[name="minBz"]')).value),
-  maxBz = Number((formB.querySelector('[name="maxBz"]')).value),
-  stepBz = Number((formB.querySelector('[name="stepBz"]')).value),
   
   
   // заменяем график
 
-  c = document.createElement('canvas');
-  c.setAttribute("id", "grafica9");
-  c.setAttribute("width", "50");
-  c.setAttribute("height", "15");
-  grafica3.replaceWith(c);
-  grafica9 = document.querySelector('#grafica9');
   arr = getXmaxValue(depthBoxy);
   arr1 = getYmaxValue(depthBoxy);
-  arr2 = getYmaxValue(depthBz);
   if (depthMax == 0 )
    depthMax = Math.max(...arr);
   if (minBoxy == 0)
   minBoxy = 0 ;
-  if (maxBz == 0)
-     maxBz = Math.max(...arr2) ;
-  if (maxBoxy == 0)
-  maxBoxy = Math.max(...arr1) + maxBz/2 ;
-  if (minBz == 0)
-     minBz = 0 ;
 
-  new Chart(grafica9,
-  {
-    type: 'scatter', // Тип графики
-    data: {
-      datasets: [
-        {
-          label: 'Boxy',
-          yAxisID: 'A',
-          data: depthBoxy,
-          showLine: true,
-          fill: false,
-          borderColor: 'rgba(0, 0, 255)',
-        },
-        {
-          label: 'Bz',
-          yAxesID: 'B',
-          data: depthBz,
-          showLine: true,
-          fill: false,
-          borderColor: 'rgba(200, 0, 0, 1)',
-        },
-      ],
-    },
-    options: {
-      title: {
-            display: true,
-            text: 'График соотношений показаний осевых и поперечных магнитометров',
-            position: 'top',
-            fontSize: 16,
-            padding: 20,
-        },
-      scales: {
-        yAxes: [{
-          id: 'A',
-          scaleLabel: {
-            display: true,
-            labelString: 'Boxy, нТл',
-          },
-          type: 'linear',
-          position: 'left',
-          ticks: {
-            max: maxBoxy,
-            min: minBoxy,
-            stepSize:stepBoxy,
-          },
-        },
-        {
-          id: 'B',
-          scaleLabel: {
-            display: true,
-            labelString: 'Bz, нТл',
-          },
-          type: 'linear',
-          position: 'right',
-          ticks: {
-            max: maxBz,
-            min: minBz,
-            stepSize:stepBz,
-          },
-        }],
-        // for zooming
-        xAxes: [{
-          scaleLabel: {
-            display: true,
-            labelString: 'Измеренная глубина, м',
-          },
-          ticks: {
-            max: depthMax,
-            min: depthMin,
-            stepSize:depthStep,
-          },
-        }],
-      },
-      pan: {
-        enabled: true,
-        mode: 'xy',
-      },
-      zoom: {
-        enabled: true,
-        mode: 'y',
-      },
-    },
-  });
+  if (maxBoxy == 0)
+  maxBoxy = Math.max(...arr1);
+  changeGraphic(ChartGr3, minBoxy, maxBoxy, stepBoxy, 'Bxyz, нТл', depthMin, depthMax, depthStep)
 });
 
 //Обработка кнопки Submit и получаем значение полей ввода для графика Btotal
@@ -695,12 +477,6 @@ formBt.addEventListener('submit',(e) => {
   depthMax = Number((formBt.querySelector('[name="depthMax"]')).value),
   depthStep = Number((formBt.querySelector('[name="depthStep"]')).value)
 
-  c = document.createElement('canvas');
-  c.setAttribute("id", "grafica10");
-  c.setAttribute("width", "50");
-  c.setAttribute("height", "15");
-  grafica4.replaceWith(c);
-  grafica10 = document.querySelector('#grafica10');
   arr = getXmaxValue(depthBraw);
   arr1 = getYmaxValue(depthBraw);
 
@@ -710,103 +486,8 @@ formBt.addEventListener('submit',(e) => {
      maxBtotal= Math.max(...arr1);
   if (minBtotal == 0 )
      minBtotal = Math.min(...arr1) - maxBtotal/20;
+  changeGraphic(ChartGr4, minBtotal, maxBtotal, stepBtotal, 'Btotal, нТл', depthMin, depthMax, depthStep)
 
-  new Chart(grafica10,
-  {
-    type: 'scatter', // Тип графики
-    data: {
-      datasets: [
-        {
-          label: 'Bt_Raw',
-          yAxisID: 'A',
-          data: depthBraw,
-          showLine: true,
-          fill: false,
-          borderColor: 'rgba(253, 233, 16)',
-        },
-        {
-          yAxesID: 'B',
-          data: depthBcorr,
-          label: 'Bcorr',
-          showLine: true,
-          fill: false,
-          borderColor:  'rgba(0, 0, 255)',
-          borderWidth: 2,
-        },
-        {
-          yAxesID: 'C',
-          label: 'Bmax',
-          data: depthBmax,
-          showLine: true,
-          fill: false,
-          borderColor: 'rgba( 255,0,51)',
-        },
-        {          
-          yAxesID: 'D',
-          label: 'Bref',
-          data: depthBrefFixed,
-          showLine: true,
-          showLabel: false,
-          fill: false,
-          borderColor: 'rgba(102, 255, 0)',
-        },
-        {
-          yAxesID: 'E',
-          data: depthBmin,
-          label: 'Bmin',
-          showLine: true,
-          fill: false,
-          borderColor: 'rgba( 255,0,51)',
-        },
-      ],
-    },
-    options: {
-      title: {
-            display: true,
-            text: 'График напряженности геомагнитного поля',
-            position: 'top',
-            fontSize: 16,
-            padding: 20,
-        },
-      scales: {
-        yAxes: [{
-          id: 'A',
-          scaleLabel: {
-            display: true,
-            labelString: 'Btotal,нТл ',
-          },
-          type: 'linear',
-          position: 'left',
-          ticks: {
-            max: maxBtotal,
-            min: minBtotal,
-            stepSize: stepBtotal,
-          },
-        }],
-        // for zooming
-        xAxes: [{
-          ticks: {
-            min:depthMin,
-            max:depthMax,
-            stepSize: depthStep,
-            autoSkip: false,
-            },
-          scaleLabel: {
-            display: true,
-            labelString: 'Измеренная глубина, м',
-          },
-        }],
-      },
-      pan: {
-        enabled: true,
-        mode: 'xy',
-      },
-      zoom: {
-        enabled: true,
-        mode: 'y',
-      },
-    },
-  });
 });
 
 
@@ -818,122 +499,12 @@ formHSTF.addEventListener('submit',(e) => {
   depthStep = Number((formHSTF.querySelector('[name="depthStep"]')).value),
   
   // заменяем график
-  c = document.createElement('canvas');
-  c.setAttribute("id", "grafica11");
-  c.setAttribute("width", "50");
-  c.setAttribute("height", "15");
-  grafica5.replaceWith(c);
-  grafica11 = document.querySelector('#grafica11');
+
   arr = getXmaxValue(depthHSTF);
   if (depthMax == 0 )
     depthMax = Math.max(...arr);
-   
-  new Chart(grafica11,
-  {
-    type: 'scatter', // Тип графики
-    data: {
-      datasets: [
-        {
-          label: 'HSTF',
-          yAxisID: 'A',
-          data: depthHSTF,
-          showLine: false,
-          fill: false,
-          borderColor: 'rgba(0,0,255)',
-          borderWidth: 3,
-          position: 'left',
-          },
-              {
-          yAxesID: 'B',
-          display: false,
-          data: hstf90 ,
-          showLine: true,
-          fill: false,
-          borderWidth: 1,
-          borderColor: 'rgba( 255,0,51)',
-          },
-        {
-          yAxesID: 'C',
-          display: false,
-          data: hstf180 ,
-          showLine: true,
-          fill: false,
-          borderWidth: 1,
-          borderColor: 'rgba( 255,0,51)',
-         },
-        {
-          yAxesID: 'D',
-          display: false,
-          data: hstf270 ,
-          showLine: true,
-          fill: false,
-          borderWidth: 1,
-          borderColor: 'rgba( 255,0,51)',
-          },
-        {
-          yAxesID: 'E',
-          data: hstf360 ,
-          display: false,
-          showLine: true,
-          fill: false,
-          borderWidth: 1,
-          borderColor: 'rgba( 255,0,51)',
-          },
-      ],
-    },
-    options: {
-      title: {
-            display: true,
-            text: 'HSTF',
-            position: 'top',
-            fontSize: 16,
-            padding: 20,
-        },
-      plugins: {
-            legend: false,
-            },
-      scales: {
-        yAxes: [{
-          legend: {
-          display: false,
-         },
-          id: 'A',
-          scaleLabel: {
-            display: true,
-            labelString: 'HSTF',
-          },
-         
-          type: 'linear',
-          position: 'left',
-          ticks: {
-            max: 360,
-            min: 0,
-            stepSize:90,
-          },
-        }],
-        // for zooming
-        xAxes: [{
-          scaleLabel: {
-            display: true,
-            labelString: 'Измеренная глубина, м',
-          },
-          ticks: {
-            max: depthMax,
-            min: depthMin,
-            stepSize:depthStep,
-          },
-        }],
-      },
-      pan: {
-        enabled: true,
-        mode: 'xy',
-      },
-      zoom: {
-        enabled: true,
-        mode: 'x',
-      },
-    },
-});
+  changeGraphic(ChartGr5, 0, 360, 90, 'HSTF', depthMin, depthMax, depthStep)
+
 });
 
 //Обработка кнопки Submit и получаем значение полей ввода для графика Dip
@@ -947,12 +518,6 @@ formDip.addEventListener('submit',(e) => {
   depthMax = Number((formDip.querySelector('[name="depthMax"]')).value),
   depthStep = Number((formDip.querySelector('[name="depthStep"]')).value)
 
-  c = document.createElement('canvas');
-  c.setAttribute("id", "grafica12");
-  c.setAttribute("width", "50");
-  c.setAttribute("height", "15");
-  grafica6.replaceWith(c);
-  grafica12 = document.querySelector('#grafica12');
   arr = getXmaxValue(depthDipraw);
   arr1 = getYmaxValue(depthDipraw);
   if (depthMax == 0 )
@@ -961,120 +526,26 @@ formDip.addEventListener('submit',(e) => {
      maxDip= Math.max(...arr1);
   if (minDip == 0 )
   minDip = Math.min(...arr1);
-
-  new Chart(grafica12,
-  {
-    type: 'scatter', // Тип графики
-    data: {
-      datasets: [
-        {
-          label: 'DipRaw',
-          yAxisID: 'A',
-          data: depthDipraw,
-          showLine: true,
-          fill: false,
-          borderColor: 'rgba(253, 233, 16)',
-        },
-        {
-          
-          yAxesID: 'B',
-          label: 'DipRef',
-          data: depthDiprefFixed,
-          showLine: true,
-          showLabel: false,
-          fill: false,
-          borderColor: 'rgba(102, 255, 0)',
-        },
-        {
-          yAxesID: 'C',
-          label: 'DipMax',
-          data: depthDipmax,
-          showLine: true,
-          fill: false,
-          borderColor: 'rgba( 255,0,51)',
-        },
-        {
-          yAxesID: 'D',
-          data: depthDipmin,
-          label: 'DipMin',
-          showLine: true,
-          fill: false,
-          borderColor: 'rgba( 255,0,51)',
-        },
-        {
-          yAxesID: 'E',
-          data: depthDipcorr,
-          label: 'DipCorr',
-          showLine: true,
-          fill: false,
-          borderColor: 'rgba(0, 0, 255)',
-        },
-      ],
-    },
-    options: {
-      title: {
-            display: true,
-            text: 'График магнитного наклонения',
-            position: 'top',
-            fontSize: 16,
-            padding: 20
-        },
-      scales: {
-        yAxes: [{
-          ticks: {
-            max: maxDip,
-            min: minDip,
-            stepSize:stepDip,
-          },
-          id: 'A',
-          scaleLabel: {
-            display: true,
-            labelString: 'Магнитное наклонение,гр ',
-          },
-          type: 'linear',
-          position: 'left',
-        }],
-        // for zooming
-        xAxes: [{
-          scaleLabel: {
-            display: true,
-            labelString: 'Измеренная глубина, м',
-          },
-          ticks: {
-            max: depthMax,
-            min: depthMin,
-            stepSize:depthStep,
-          },
-        }],
-      },
-      pan: {
-        enabled: true,
-        mode: 'xy',
-      },
-      zoom: {
-        enabled: true,
-        mode: 'y',
-      },
-    },
-  });
+  changeGraphic(ChartGr6, minDip, maxDip, stepDip, 'Магнитное наклонение,гр ', depthMin, depthMax, depthStep)
 });
 
-new Chart(grafica1,
+
+
+ChartGr1 = new Chart(grafica1,
   {
     type: 'scatter', // Тип графики
     backgroundColor:'rgba(0, 0, 255)',
     data: {
       datasets: [
         {
-          label: 'Goxy',
+          label: 'Gxyz',
           yAxisID: 'A',
           data: depthGoxy,
           showLine: true,
           fill: false,
           borderColor: 'rgba(0, 0, 255)',
-         
         },
-        {
+         {
           label: 'Gz',
           yAxesID: 'B',
           data: depthGz,
@@ -1085,6 +556,29 @@ new Chart(grafica1,
       ],
     },
     options: {
+    tooltips: {
+                    enabled: true,
+                    //mode: 'index',
+
+                    custom: function (tooltip) {
+                        if (!tooltip.opacity) {
+                            return;
+                        }
+                        // Здесь добавляем текст для всплывающей подсказки
+                        const line = depthGoxy.find(line => line.x == tooltip.dataPoints[0].xLabel);
+                        tooltip.title = [line.label];
+                        //tooltip.width =
+                        tooltip.height = 50
+
+                    },
+       },
+    plugins: {
+              verticalLinePlugin: {
+                lines: coordVerticalLines, // массив значений по оси X, где надо провести вертикальные линии
+                color: '#ADD8E6', // цвет вертикальной линии
+                width: 2 // ширина вертикальной линии
+               }
+      },
       title: {
             display: true,
             text: 'График соотношения показаний осевого и поперечных акселерометров',
@@ -1097,20 +591,12 @@ new Chart(grafica1,
           id: 'A',
           scaleLabel: {
             display: true,
-            labelString: 'Goxy, G',
+            labelString: 'Gxyz, G',
           },
           type: 'linear',
           position: 'left',
          },
-        {
-          id: 'B',
-          scaleLabel: {
-            display: true,
-            labelString: 'Gz, G',
-          },
-          type: 'linear',
-          position: 'right',
-          }],
+        ],
         xAxes: [{
            scaleLabel: {
             display: true,
@@ -1127,6 +613,27 @@ new Chart(grafica1,
         mode: 'y',
       },
      },
+plugins: [{
+                beforeDraw: function (chart) {
+                    var ctx = chart.ctx;
+                    // Получаем координаты для вертикальной линии
+                    var lines = chart.options.plugins.verticalLinePlugin.lines;
+                    var topY = chart.scales['A'].top;
+                    var bottomY = chart.scales['A'].bottom;
+
+                    // Рисуем вертикальную линию
+                    ctx.strokeStyle = chart.options.plugins.verticalLinePlugin.color;
+                    ctx.lineWidth = chart.options.plugins.verticalLinePlugin.width;
+                    lines.forEach(function (line) {
+                        var x = chart.scales['x-axis-1'].getPixelForValue(line);
+                        ctx.beginPath();
+                        ctx.moveTo(x, topY);
+                        ctx.lineTo(x, bottomY);
+                        ctx.stroke();
+                    });
+                    ctx.restore();
+                }
+            }]
   });
 const Gref = Math.max(...getYmaxValue(depthGref));;
 const Gmax = Gref + 0.003;
@@ -1145,7 +652,7 @@ const depthGmax = [{ x: fDepthG, y: Gmax },
 const depthGmin = [{ x: fDepthG, y: Gmin },
   { x: lDepthG, y: Gmin },
 ];
-new Chart(grafica2,
+ChartGr2 = new Chart(grafica2,
   {
     type: 'scatter', // Тип графики
     data: {
@@ -1186,6 +693,29 @@ new Chart(grafica2,
       ],
     },
     options: {
+    tooltips: {
+                    enabled: true,
+                    //mode: 'index',
+
+                    custom: function (tooltip) {
+                        if (!tooltip.opacity) {
+                            return;
+                        }
+                        // Здесь добавляем текст для всплывающей подсказки
+                        const line = depthGoxy.find(line => line.x == tooltip.dataPoints[0].xLabel);
+                        tooltip.title = [line.label];
+                        //tooltip.width =
+                        tooltip.height = 50
+
+                    },
+       },
+    plugins: {
+              verticalLinePlugin: {
+                lines: coordVerticalLines, // массив значений по оси X, где надо провести вертикальные линии
+                color: '#ADD8E6', // цвет вертикальной линии
+                width: 2 // ширина вертикальной линии
+               }
+      },
       title: {
             display: true,
             text: 'График напряженности гравитационного поля',
@@ -1223,15 +753,36 @@ new Chart(grafica2,
         mode: 'y',
       },
     },
+    plugins: [{
+                beforeDraw: function (chart) {
+                    var ctx = chart.ctx;
+                    // Получаем координаты для вертикальной линии
+                    var lines = chart.options.plugins.verticalLinePlugin.lines;
+                    var topY = chart.scales['A'].top;
+                    var bottomY = chart.scales['A'].bottom;
+
+                    // Рисуем вертикальную линию
+                    ctx.strokeStyle = chart.options.plugins.verticalLinePlugin.color;
+                    ctx.lineWidth = chart.options.plugins.verticalLinePlugin.width;
+                    lines.forEach(function (line) {
+                        var x = chart.scales['x-axis-1'].getPixelForValue(line);
+                        ctx.beginPath();
+                        ctx.moveTo(x, topY);
+                        ctx.lineTo(x, bottomY);
+                        ctx.stroke();
+                    });
+                    ctx.restore();
+                }
+            }]
   });
 
-new Chart(grafica3,
+ChartGr3 = new Chart(grafica3,
   {
     type: 'scatter', // Тип графики
     data: {
       datasets: [
         {
-          label: 'Boxy',
+          label: 'Bxyz',
           yAxisID: 'A',
           data: depthBoxy,
           showLine: true,
@@ -1249,6 +800,29 @@ new Chart(grafica3,
       ],
     },
     options: {
+    tooltips: {
+                    enabled: true,
+                    //mode: 'index',
+
+                    custom: function (tooltip) {
+                        if (!tooltip.opacity) {
+                            return;
+                        }
+                        // Здесь добавляем текст для всплывающей подсказки
+                        const line = depthGoxy.find(line => line.x == tooltip.dataPoints[0].xLabel);
+                        tooltip.title = [line.label];
+                        //tooltip.width =
+                        tooltip.height = 50
+
+                    },
+       },
+    plugins: {
+              verticalLinePlugin: {
+                lines: coordVerticalLines, // массив значений по оси X, где надо провести вертикальные линии
+                color: '#ADD8E6', // цвет вертикальной линии
+                width: 2 // ширина вертикальной линии
+               }
+      },
       title: {
             display: true,
             text: 'График соотношений показаний осевых и поперечных магнитометров',
@@ -1261,25 +835,12 @@ new Chart(grafica3,
           id: 'A',
           scaleLabel: {
             display: true,
-            labelString: 'Boxy, нТл',
+            labelString: 'Bxyz, нТл',
           },
           type: 'linear',
           position: 'left',
           },
-        {
-          id: 'B',
-          scaleLabel: {
-            display: true,
-            labelString: 'Bz, нТл',
-          },
-          type: 'linear',
-          position: 'right',
-          ticks: {
-            max: 70000,
-            min: 0,
-            stepSize:3500,
-          },
-         }],
+        ],
         // for zooming
         xAxes: [{
           scaleLabel: {
@@ -1297,6 +858,27 @@ new Chart(grafica3,
         mode: 'y',
       },
     },
+    plugins: [{
+                beforeDraw: function (chart) {
+                    var ctx = chart.ctx;
+                    // Получаем координаты для вертикальной линии
+                    var lines = chart.options.plugins.verticalLinePlugin.lines;
+                    var topY = chart.scales['A'].top;
+                    var bottomY = chart.scales['A'].bottom;
+
+                    // Рисуем вертикальную линию
+                    ctx.strokeStyle = chart.options.plugins.verticalLinePlugin.color;
+                    ctx.lineWidth = chart.options.plugins.verticalLinePlugin.width;
+                    lines.forEach(function (line) {
+                        var x = chart.scales['x-axis-1'].getPixelForValue(line);
+                        ctx.beginPath();
+                        ctx.moveTo(x, topY);
+                        ctx.lineTo(x, bottomY);
+                        ctx.stroke();
+                    });
+                    ctx.restore();
+                }
+            }]
   });
 const Bref = Math.max(...getYmaxValue(depthBref));
 const Bmax = Bref + 300;
@@ -1315,7 +897,7 @@ const depthBmax = [{ x: fDepthB, y: Bmax },
 const depthBmin = [{ x: fDepthB, y: Bmin },
   { x: lDepthB, y:Bmin },
 ];
-  new Chart(grafica4,
+ChartGr4 = new Chart(grafica4,
   {
     type: 'scatter', // Тип графики
     data: {
@@ -1365,6 +947,29 @@ const depthBmin = [{ x: fDepthB, y: Bmin },
       ],
     },
     options: {
+    tooltips: {
+                    enabled: true,
+                    //mode: 'index',
+
+                    custom: function (tooltip) {
+                        if (!tooltip.opacity) {
+                            return;
+                        }
+                        // Здесь добавляем текст для всплывающей подсказки
+                        const line = depthGoxy.find(line => line.x == tooltip.dataPoints[0].xLabel);
+                        tooltip.title = [line.label];
+                        //tooltip.width =
+                        tooltip.height = 50
+
+                    },
+       },
+    plugins: {
+              verticalLinePlugin: {
+                lines: coordVerticalLines, // массив значений по оси X, где надо провести вертикальные линии
+                color: '#ADD8E6', // цвет вертикальной линии
+                width: 2 // ширина вертикальной линии
+               }
+      },
       title: {
             display: true,
             text: 'График напряженности геомагнитного поля',
@@ -1399,6 +1004,27 @@ const depthBmin = [{ x: fDepthB, y: Bmin },
         mode: 'y',
       },
     },
+    plugins: [{
+                beforeDraw: function (chart) {
+                    var ctx = chart.ctx;
+                    // Получаем координаты для вертикальной линии
+                    var lines = chart.options.plugins.verticalLinePlugin.lines;
+                    var topY = chart.scales['A'].top;
+                    var bottomY = chart.scales['A'].bottom;
+
+                    // Рисуем вертикальную линию
+                    ctx.strokeStyle = chart.options.plugins.verticalLinePlugin.color;
+                    ctx.lineWidth = chart.options.plugins.verticalLinePlugin.width;
+                    lines.forEach(function (line) {
+                        var x = chart.scales['x-axis-1'].getPixelForValue(line);
+                        ctx.beginPath();
+                        ctx.moveTo(x, topY);
+                        ctx.lineTo(x, bottomY);
+                        ctx.stroke();
+                    });
+                    ctx.restore();
+                }
+            }]
   });
 
 // глубина последне предоставленной точки замера
@@ -1418,7 +1044,7 @@ const hstf270 = [{ x: firstDepth, y: 270 },
 const hstf360 = [{ x: firstDepth, y: 360 },
   { x: lastDepth, y: 360 },
 ];
-new Chart(grafica5,
+ChartGr5 = new Chart(grafica5,
   {
     type: 'scatter', // Тип графики
     data: {
@@ -1472,6 +1098,26 @@ new Chart(grafica5,
       ],
     },
     options: {
+    tooltips: {
+                    enabled: true,
+                    custom: function (tooltip) {
+                        if (!tooltip.opacity) {
+                            return;
+                        }
+                        // Здесь добавляем текст для всплывающей подсказки
+                        const line = depthGoxy.find(line => line.x == tooltip.dataPoints[0].xLabel);
+                        tooltip.title = [line.label];
+                        tooltip.height = 50
+                    },
+       },
+    plugins: {
+              legend: false,
+              verticalLinePlugin: {
+                lines: coordVerticalLines, // массив значений по оси X, где надо провести вертикальные линии
+                color: '#ADD8E6', // цвет вертикальной линии
+                width: 2 // ширина вертикальной линии
+               }
+      },
       title: {
             display: true,
             text: 'HSTF',
@@ -1479,9 +1125,6 @@ new Chart(grafica5,
             fontSize: 16,
             padding: 20,
         },
-      plugins: {
-            legend: false,
-            },
       scales: {
         yAxes: [{
           legend: {
@@ -1519,6 +1162,27 @@ new Chart(grafica5,
         mode: 'x',
       },
     },
+    plugins: [{
+                beforeDraw: function (chart) {
+                    var ctx = chart.ctx;
+                    // Получаем координаты для вертикальной линии
+                    var lines = chart.options.plugins.verticalLinePlugin.lines;
+                    var topY = chart.scales['A'].top;
+                    var bottomY = chart.scales['A'].bottom;
+
+                    // Рисуем вертикальную линию
+                    ctx.strokeStyle = chart.options.plugins.verticalLinePlugin.color;
+                    ctx.lineWidth = chart.options.plugins.verticalLinePlugin.width;
+                    lines.forEach(function (line) {
+                        var x = chart.scales['x-axis-1'].getPixelForValue(line);
+                        ctx.beginPath();
+                        ctx.moveTo(x, topY);
+                        ctx.lineTo(x, bottomY);
+                        ctx.stroke();
+                    });
+                    ctx.restore();
+                }
+            }],
   });
 
 // данные которые нужно сформировать в apps из моделей;
@@ -1542,7 +1206,7 @@ const depthDipmax = [{ x: fDepth, y: DipMax },
 const depthDipmin = [{ x: fDepth, y: DipMin },
   { x: lDepth, y: DipMin },
 ];
-new Chart(grafica6,
+ChartGr6 = new Chart(grafica6,
   {
     type: 'scatter', // Тип графики
     data: {
@@ -1592,6 +1256,29 @@ new Chart(grafica6,
       ],
     },
     options: {
+    tooltips: {
+                    enabled: true,
+                    //mode: 'index',
+
+                    custom: function (tooltip) {
+                        if (!tooltip.opacity) {
+                            return;
+                        }
+                        // Здесь добавляем текст для всплывающей подсказки
+                        const line = depthGoxy.find(line => line.x == tooltip.dataPoints[0].xLabel);
+                        tooltip.title = [line.label];
+                        //tooltip.width =
+                        tooltip.height = 50
+
+                    },
+       },
+    plugins: {
+              verticalLinePlugin: {
+                lines: coordVerticalLines, // массив значений по оси X, где надо провести вертикальные линии
+                color: '#ADD8E6', // цвет вертикальной линии
+                width: 2 // ширина вертикальной линии
+               }
+      },
       title: {
             display: true,
             text: 'График магнитного наклонения',
@@ -1626,6 +1313,27 @@ new Chart(grafica6,
         mode: 'y',
       },
     },
+    plugins: [{
+                beforeDraw: function (chart) {
+                    var ctx = chart.ctx;
+                    // Получаем координаты для вертикальной линии
+                    var lines = chart.options.plugins.verticalLinePlugin.lines;
+                    var topY = chart.scales['A'].top;
+                    var bottomY = chart.scales['A'].bottom;
+
+                    // Рисуем вертикальную линию
+                    ctx.strokeStyle = chart.options.plugins.verticalLinePlugin.color;
+                    ctx.lineWidth = chart.options.plugins.verticalLinePlugin.width;
+                    lines.forEach(function (line) {
+                        var x = chart.scales['x-axis-1'].getPixelForValue(line);
+                        ctx.beginPath();
+                        ctx.moveTo(x, topY);
+                        ctx.lineTo(x, bottomY);
+                        ctx.stroke();
+                    });
+                    ctx.restore();
+                }
+            }],
   });
 
   <!-- Обработчик для сортировки-->

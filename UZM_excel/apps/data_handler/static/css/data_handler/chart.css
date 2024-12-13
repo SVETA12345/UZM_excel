@@ -82,3 +82,22 @@ input{
 }
 #undo:hover,#sbtn:hover { background: linear-gradient(#f5ae00, #f59500) #f5ae00; }
 #undo:active,#sbtn:active { background: linear-gradient(#f59500, #f5ae00) #f59500; }
+
+.reises__button{
+    display: flex;
+    margin-top: 10px;
+    max-width: 400px;
+    font-weight: 700;
+}
+
+.checkbox{
+    background-image: url("../../img/active_checkbox.png");
+    background-color: transparent;
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 50px;
+    border:none;
+}
+.checkbox_pasive{
+    background-image: url("../../img/pasive_checkbox.png");
+}
