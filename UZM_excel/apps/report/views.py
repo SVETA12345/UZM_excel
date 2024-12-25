@@ -206,6 +206,10 @@ def graph_param_giver(model, my_wellbore) -> dict:
             'y_max': my_param.y_max,
             'y_del': my_param.y_del}
 
+def check_len_dic(dic, ln):
+    if len(dic)>ln:
+        return dic[ln]
+    return None
 def graph_param_nine_giver(model, my_wellbore) -> dict:
     """Получение параметров масштаба для графиков c 9 параметрами"""
     try:
@@ -242,56 +246,56 @@ def quality_param(request, wellbore_id):
     except Wellbore.DoesNotExist:
         return JsonResponse({'status': f'Error: Wellbore with ID-{wellbore_id} DoesNotExist.'})
     if request.method == 'POST':
-        graph_param_saver(Graf1Param, wellbore_id, {'x_min': dict(request.POST)['depthMin'][0] or None,
-                                          'x_max': dict(request.POST)['depthMax'][0] or None,
-                                          'x_del': dict(request.POST)['depthStep'][0] or None,
+        graph_param_saver(Graf1Param, wellbore_id, {'x_min': check_len_dic(dict(request.POST)['depthMin'], 0),
+                                          'x_max': check_len_dic(dict(request.POST)['depthMax'], 0),
+                                          'x_del': check_len_dic(dict(request.POST)['depthStep'], 0),
                                           'y_min': request.POST['minGoxy'] or None,
                                           'y_max': request.POST['maxGoxy'] or None,
                                           'y_del': request.POST['stepGoxy'] or None,
-                                          'y_minGz': request.POST['minGz'] or None,
-                                          'y_maxGz': request.POST['maxGz'] or None,
-                                          'y_delGz': request.POST['stepGz'] or None,
+                                          #'y_minGz': request.POST['minGz'] or None,
+                                          #'y_maxGz': request.POST['maxGz'] or None,
+                                          #'y_delGz': request.POST['stepGz'] or None,
                                           'wellbore_id': wellbore_id})
 
-        graph_param_saver(Graf2Param, wellbore_id, {'x_min': dict(request.POST)['depthMin'][1],
-                                          'x_max': dict(request.POST)['depthMax'][1],
-                                          'x_del': dict(request.POST)['depthStep'][1],
-                                          'y_min': request.POST['minGtotal'],
-                                          'y_max': request.POST['maxGtotal'],
-                                          'y_del': request.POST['stepGtotal'],
+        graph_param_saver(Graf2Param, wellbore_id, {'x_min': check_len_dic(dict(request.POST)['depthMin'], 1),
+                                          'x_max': check_len_dic(dict(request.POST)['depthMax'], 1),
+                                          'x_del': check_len_dic(dict(request.POST)['depthStep'], 1),
+                                          'y_min': request.POST['minGtotal'] or None,
+                                          'y_max': request.POST['maxGtotal'] or None,
+                                          'y_del': request.POST['stepGtotal'] or None,
                                           'wellbore_id': wellbore_id})
 
-        graph_param_saver(Graf3Param, wellbore_id, {'x_min': dict(request.POST)['depthMin'][2],
-                                          'x_max': dict(request.POST)['depthMax'][2],
-                                          'x_del': dict(request.POST)['depthStep'][2],
-                                          'y_min': request.POST['minBoxy'],
-                                          'y_max': request.POST['maxBoxy'],
-                                          'y_del': request.POST['stepBoxy'],
-                                          'y_minBz': request.POST['minBz'],
-                                          'y_maxBz': request.POST['maxBz'],
-                                          'y_delBz': request.POST['stepBz'],
+        graph_param_saver(Graf3Param, wellbore_id, {'x_min': check_len_dic(dict(request.POST)['depthMin'], 2),
+                                          'x_max': check_len_dic(dict(request.POST)['depthMax'], 2),
+                                          'x_del': check_len_dic(dict(request.POST)['depthStep'], 2),
+                                          'y_min': request.POST['minBoxy'] or None,
+                                          'y_max': request.POST['maxBoxy'] or None,
+                                          'y_del': request.POST['stepBoxy'] or None,
+                                          #'y_minBz': request.POST['minBz'],
+                                          #'y_maxBz': request.POST['maxBz'],
+                                          #'y_delBz': request.POST['stepBz'],
                                           'wellbore_id': wellbore_id})
 
-        graph_param_saver(Graf4Param, wellbore_id, {'x_min': dict(request.POST)['depthMin'][3],
-                                          'x_max': dict(request.POST)['depthMax'][3],
-                                          'x_del': dict(request.POST)['depthStep'][3],
-                                          'y_min': request.POST['minBtot'],
-                                          'y_max': request.POST['maxBtot'],
-                                          'y_del': request.POST['stepBtot'],
+        graph_param_saver(Graf4Param, wellbore_id, {'x_min': check_len_dic(dict(request.POST)['depthMin'], 3),
+                                          'x_max': check_len_dic(dict(request.POST)['depthMax'], 3),
+                                          'x_del': check_len_dic(dict(request.POST)['depthStep'], 3),
+                                          'y_min': request.POST['minBtot'] or None,
+                                          'y_max': request.POST['maxBtot'] or None,
+                                          'y_del': request.POST['stepBtot'] or None,
                                           'wellbore_id': wellbore_id})
-        graph_param_saver(Graf5Param, wellbore_id, {'x_min': dict(request.POST)['depthMin'][5] or None,
-                                                    'x_max': dict(request.POST)['depthMax'][5] or None,
-                                                    'x_del': dict(request.POST)['depthStep'][5] or None,
+        graph_param_saver(Graf5Param, wellbore_id, {'x_min': check_len_dic(dict(request.POST)['depthMin'], 4),
+                                                    'x_max': check_len_dic(dict(request.POST)['depthMax'], 4),
+                                                     'x_del': check_len_dic(dict(request.POST)['depthStep'], 4),
                                                     'y_min': request.POST['minDip'] or None,
                                                     'y_max': request.POST['maxDip'] or None,
                                                     'y_del': request.POST['stepDip'] or None,
                                                     'wellbore_id': wellbore_id})
-        graph_param_saver(Graf6Param, wellbore_id, {'x_min': dict(request.POST)['depthMin'][5],
-                                          'x_max': dict(request.POST)['depthMax'][5],
-                                          'x_del': dict(request.POST)['depthStep'][5],
-                                          'y_min': request.POST['minDip'],
-                                          'y_max': request.POST['maxDip'],
-                                          'y_del': request.POST['stepDip'],
+        graph_param_saver(Graf6Param, wellbore_id, {'x_min': check_len_dic(dict(request.POST)['depthMin'], 5),
+                                          'x_max': check_len_dic(dict(request.POST)['depthMax'], 5),
+                                          'x_del': check_len_dic(dict(request.POST)['depthStep'], 5),
+                                          'y_min': request.POST['minDip'] or None,
+                                          'y_max': request.POST['maxDip'] or None,
+                                          'y_del': request.POST['stepDip'] or None,
                                           'wellbore_id': wellbore_id})
 
         return JsonResponse({'status': 'ок'})

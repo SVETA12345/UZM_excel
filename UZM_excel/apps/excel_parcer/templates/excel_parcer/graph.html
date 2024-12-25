@@ -1384,9 +1384,9 @@ ChartGr6 = new Chart(grafica6,
                           form.querySelector('[name="depthMax"]').value = data['Graf1']['x_max'];
                           form.querySelector('[name="depthStep"]').value = data['Graf1']['x_del'];
 
-                          form.querySelector('[name="minGz"]').value = data['Graf1']['y_minGz'];
-                          form.querySelector('[name="maxGz"]').value = data['Graf1']['y_maxGz'];
-                          form.querySelector('[name="stepGz"]').value = data['Graf1']['y_delGz'];
+                          //form.querySelector('[name="minGz"]').value = data['Graf1']['y_minGz'];
+                          //form.querySelector('[name="maxGz"]').value = data['Graf1']['y_maxGz'];
+                          //form.querySelector('[name="stepGz"]').value = data['Graf1']['y_delGz'];
                           document.getElementById('sbtn').click();
                       };
                       if(Object.keys(data['Graf2']).length){
@@ -1405,9 +1405,9 @@ ChartGr6 = new Chart(grafica6,
                           formB.querySelector('[name="depthMin"]').value = data['Graf3']['x_min'];
                           formB.querySelector('[name="depthMax"]').value = data['Graf3']['x_max'];
                           formB.querySelector('[name="depthStep"]').value = data['Graf3']['x_del'];
-                          formB.querySelector('[name="minBz"]').value = data['Graf3']['y_minBz'];
-                          formB.querySelector('[name="maxBz"]').value = data['Graf3']['y_maxBz'];
-                          formB.querySelector('[name="stepBz"]').value = data['Graf3']['y_delBz'];
+                          //formB.querySelector('[name="minBz"]').value = data['Graf3']['y_minBz'];
+                          //formB.querySelector('[name="maxBz"]').value = data['Graf3']['y_maxBz'];
+                          //formB.querySelector('[name="stepBz"]').value = data['Graf3']['y_delBz'];
                           document.getElementById('sbtnB').click();
                       };
                       if(Object.keys(data['Graf4']).length){
@@ -1454,34 +1454,18 @@ ChartGr6 = new Chart(grafica6,
     for(var pair of formGtotal.entries()){
             data.append(pair[0], pair[1]);
             console.log(pair[0], pair[1])
-            if (!pair[1] && !messageWarning.includes('напряжённости гравитационного поля')){
-              isEmptyValue = true;
-              messageWarning =messageWarning+ '<p>напряжённости гравитационного поля;</p>';
-            }
         }
     for(var pair of formB.entries()){
             data.append(pair[0], pair[1]);
-            if (!pair[1] && !messageWarning.includes('соотношений показаний осевых и поперечных магнитометров')){
-              isEmptyValue = true;
-              messageWarning= messageWarning+'<p>соотношений показаний осевых и поперечных магнитометров;</p>'
-            }
         }
     for(var pair of formBt.entries()){
             data.append(pair[0], pair[1]);
-            if (!pair[1] && !messageWarning.includes('напряженности геомагнитного поля')){
-              isEmptyValue = true;
-              messageWarning = messageWarning+'<p>напряженности геомагнитного поля;</p>';
-            }
         }
     for(var pair of formHSTF.entries()){
             data.append(pair[0], pair[1]);
         }
     for(var pair of formDip.entries()){
             data.append(pair[0], pair[1]);
-            if (!pair[1] && !messageWarning.includes('магнитного наклонения')){
-              isEmptyValue = true;
-              messageWarning = messageWarning+'<p>магнитного наклонения;</p>';
-            }
         }
     {% if context.selected != 'None' %}
     const url = 'http://'+window.location.hostname+':'+window.location.port+'{% url 'quality_param' context.selected.id %}';
